@@ -12,9 +12,9 @@
  */
 
 const express = require('express');
-const crypto  = require('crypto');
-const path    = require('path');
-const fs      = require('fs');
+const crypto = require('crypto');
+const path = require('path');
+const fs = require('fs');
 
 // ─── Base de datos: better-sqlite3 ─────────────────────────────────────────
 const Database = require('better-sqlite3');
@@ -41,15 +41,16 @@ db.exec(`
 
 // ─── Seed de usuarios de prueba ─────────────────────────────────────────────
 // FALLA CRIPTOGRÁFICA: MD5 sin salt (CWE-327, CWE-759, CWE-916)
+// EXPLICACIÓN TÉCNICA DEL RIESGO: El uso de MD5, un algoritmo de hashing criptográficamente roto, sin añadir un "salt" (valor aleatorio único por usuario), permite que contraseñas idénticas generen el mismo hash. Esto facilita enormemente los ataques de diccionario y el uso de Rainbow Tables, comprometiendo las credenciales en caso de una filtración de la base de datos.
 function md5(str) {
   return crypto.createHash('md5').update(str).digest('hex');
 }
 
 const seedUsers = [
-  { username: 'admin',  password: md5('admin123'),  role: 'admin', email: 'admin@vulnapp.local' },
-  { username: 'alice',  password: md5('password1'), role: 'user',  email: 'alice@vulnapp.local' },
-  { username: 'bob',    password: md5('qwerty'),    role: 'user',  email: 'bob@vulnapp.local'   },
-  { username: 'carlos', password: md5('carlos2024'), role: 'user', email: 'carlos@vulnapp.local'},
+  { username: 'admin', password: md5('admin123'), role: 'admin', email: 'admin@vulnapp.local' },
+  { username: 'alice', password: md5('password1'), role: 'user', email: 'alice@vulnapp.local' },
+  { username: 'bob', password: md5('qwerty'), role: 'user', email: 'bob@vulnapp.local' },
+  { username: 'carlos', password: md5('carlos2024'), role: 'user', email: 'carlos@vulnapp.local' },
 ];
 
 const insertUser = db.prepare(`
@@ -69,6 +70,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ─── Middleware de sesión (INSEGURO: cookie Base64 sin firma HMAC) ──────────
 // FALLA CRIPTOGRÁFICA: CWE-345, CWE-311
 // El servidor confía ciegamente en el contenido de la cookie sin verificación.
+// EXPLICACIÓN TÉCNICA DEL RIESGO: La cookie de sesión se decodifica directamente desde Base64 (que es un esquema de codificación, no de cifrado). Al carecer de una firma criptográfica (como HMAC), el servidor no tiene forma de verificar la integridad del payload. Un atacante puede interceptar su cookie, decodificarla, alterar sus valores (ej. cambiar su ID de usuario o rol a "admin"), volver a codificarla en Base64 y enviarla al servidor, logrando una escalada de privilegios inmediata al saltarse los controles de autenticación.
 function getSession(req) {
   const cookieHeader = req.headers['cookie'] || '';
   const match = cookieHeader.match(/session=([^;]+)/);
@@ -84,6 +86,7 @@ function getSession(req) {
 
 // ─── ENDPOINT: POST /api/register ───────────────────────────────────────────
 // FALLA: MD5 sin salt (CWE-916, CWE-759)
+// EXPLICACIÓN TÉCNICA DEL RIESGO: Al calcular md5(password) sin salt, el hash resultante es predecible y vulnerable a ataques de fuerza bruta offline rápidos (ej. usando hashcat).
 app.post('/api/register', (req, res) => {
   const { username, password, email } = req.body;
 
@@ -96,6 +99,7 @@ app.post('/api/register', (req, res) => {
 
   // FALLA DE INYECCIÓN SQL: concatenación directa (CWE-89)
   // Esta ruta usa sentencia preparada sólo para el INSERT, pero el SELECT usa concatenación
+  // EXPLICACIÓN TÉCNICA DEL RIESGO: Concatenar el username directamente en el string de la consulta permite a un atacante enviar un username malicioso que modifique la estructura original de la consulta SQL.
   try {
     const checkQuery = `SELECT id FROM users WHERE username = '${username}'`;
     const existing = db.prepare(checkQuery).get();
@@ -119,6 +123,7 @@ app.post('/api/login', (req, res) => {
 
   // FALLA DE INYECCIÓN SQL: concatenación directa en la query → CWE-89
   // Payload de explotación:  ' OR '1'='1'--
+  // EXPLICACIÓN TÉCNICA DEL RIESGO: Al construir la consulta SQL concatenando directamente las cadenas de entrada (username y password), el intérprete SQL no puede distinguir entre el código y los datos. Un atacante puede inyectar caracteres de control (como comillas simples) para alterar el Árbol de Sintaxis Abstracta (AST) de la consulta. El payload ' OR '1'='1'-- hace que la condición WHERE siempre evalúe a verdadero (true), omitiendo la validación de la contraseña y permitiendo el acceso no autorizado.
   const query = `
     SELECT id, username, role, email, password
     FROM users
@@ -139,8 +144,9 @@ app.post('/api/login', (req, res) => {
 
   // FALLA CRIPTOGRÁFICA: sesión en Base64 plano, sin firma HMAC (CWE-345, CWE-311)
   // Payload de manipulación: decodificar, cambiar role a "admin", re-codificar
+  // EXPLICACIÓN TÉCNICA DEL RIESGO: Al emitir una cookie que almacena el estado (ID, rol) en texto plano (Base64) y sin un Message Authentication Code (MAC) adjunto, el cliente posee el control total sobre los datos de la sesión. El backend leerá y creerá cualquier valor modificado en futuras peticiones.
   const sessionPayload = JSON.stringify({ userId: user.id, username: user.username, role: user.role });
-  const sessionCookie  = Buffer.from(sessionPayload).toString('base64');
+  const sessionCookie = Buffer.from(sessionPayload).toString('base64');
 
   res.setHeader('Set-Cookie', `session=${sessionCookie}; Path=/; HttpOnly=false`);
   res.json({ message: 'Autenticado', userId: user.id, role: user.role });
@@ -156,8 +162,10 @@ app.get('/api/profile', (req, res) => {
   }
 
   // FALLA: Confianza ciega en el rol que viene de la cookie sin verificar en BD
+  // EXPLICACIÓN TÉCNICA DEL RIESGO: La aplicación implementa Control de Acceso basado en datos del lado del cliente no verificados. Un atacante que adultere la cookie puede bypassar las restricciones de autorización.
   if (session.role === 'admin') {
     // FALLA: Exposición íntegra de la BD incluyendo hashes de contraseñas
+    // EXPLICACIÓN TÉCNICA DEL RIESGO: Devolver en la API datos sensibles como hashes de contraseñas en lugar de omitirlos o redactarlos permite ataques de fuerza bruta posteriores en caso de que un atacante consiga permisos de administrador.
     const allUsers = db.prepare('SELECT id, username, password, role, email FROM users').all();
     return res.json({ admin: true, users: allUsers });
   }
@@ -176,6 +184,7 @@ app.get('/api/users/:id', (req, res) => {
   const { id } = req.params;
 
   // FALLA: el parámetro 'id' se inserta directamente sin validación de tipo
+  // EXPLICACIÓN TÉCNICA DEL RIESGO: El parámetro id se toma directamente de req.params y se inyecta en la consulta sin parametrización ni casteo a entero. Esto permite a un atacante inyectar sentencias UNION SELECT para exfiltrar datos de otras tablas de la base de datos, ya que el motor SQL procesará la entrada maliciosa como parte estructural de la consulta.
   const query = `SELECT id, username, role, email FROM users WHERE id = ${id}`;
 
   try {
@@ -198,6 +207,7 @@ app.post('/api/search', (req, res) => {
   const { query: searchTerm } = req.body;
 
   // FALLA: concatenación directa → permite UNION SELECT y extracción de sqlite_master
+  // EXPLICACIÓN TÉCNICA DEL RIESGO: La concatenación en una cláusula LIKE ('%${searchTerm}%') sin escapar caracteres especiales es extremadamente peligrosa. Permite que un atacante cierre la comilla, termine la sentencia LIKE y anexe un UNION SELECT. Como la base de datos es SQLite, el atacante puede consultar la tabla sqlite_master para obtener el esquema completo de la base de datos y luego extraer datos de cualquier otra tabla.
   const sqlQuery = `
     SELECT id, username, email
     FROM users
@@ -226,6 +236,7 @@ app.post('/api/message', (req, res) => {
   }
 
   // FALLA: el contenido se inserta tal cual en la BD, sin sanitización (CWE-79)
+  // EXPLICACIÓN TÉCNICA DEL RIESGO: Al almacenar la entrada del usuario en la base de datos (Stored XSS) sin aplicar ninguna sanitización (como HTML Entity Encoding), cualquier script inyectado (ej. <script>...</script>) será devuelto intacto a los clientes que soliciten los mensajes. Cuando el navegador de la víctima reciba el contenido, ejecutará el código malicioso en el contexto de la aplicación, permitiendo el robo de sesiones o acciones no autorizadas.
   db.prepare(`
     INSERT INTO messages (sender_id, receiver_id, content)
     VALUES (?, ?, ?)
@@ -236,6 +247,7 @@ app.post('/api/message', (req, res) => {
 
 // ─── ENDPOINT: GET /api/messages ─────────────────────────────────────────────
 // FALLA: Los mensajes se devuelven crudos; el frontend los renderiza con innerHTML (CWE-116)
+// EXPLICACIÓN TÉCNICA DEL RIESGO: La API devuelve los datos sin neutralizar los caracteres con significado especial en HTML. Esto viola el principio de Defensa en Profundidad y transfiere la responsabilidad total de sanitización al frontend, lo cual a menudo falla (como se ve en el uso de innerHTML en esta app).
 app.get('/api/messages', (req, res) => {
   const session = getSession(req);
   if (!session) return res.status(401).json({ error: 'No autenticado' });
@@ -255,6 +267,6 @@ app.get('/api/messages', (req, res) => {
 // ─── Inicia el servidor ──────────────────────────────────────────────────────
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[VulnApp VULNERABLE] Backend corriendo en http://0.0.0.0:${PORT}`);
+  console.log(\`[VulnApp VULNERABLE] Backend corriendo en http://0.0.0.0:\${PORT}\`);
   console.log('ADVERTENCIA: Este servidor es deliberadamente inseguro. Solo para uso en laboratorio.');
 });
