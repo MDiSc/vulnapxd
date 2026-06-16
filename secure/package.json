@@ -1,0 +1,13 @@
+{
+  "name": "vulnapp-secure",
+  "version": "2.0.0",
+  "description": "VulnApp — Versión ASEGURADA (Rama: feature/injection + feature/crypto-failures mergeadas). Solo Node.js v20 nativo + better-sqlite3.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.3",
+    "express": "^4.18.2"
+  }
+}
