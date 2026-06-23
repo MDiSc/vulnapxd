@@ -167,6 +167,14 @@ python3 red-team/06_verificacion_contramedidas.py
 | CWE-345/311      | Cookie firmada HMAC-SHA256          | `crypto.createHmac('sha256', SECRET)` |
 | Timing Attack    | Comparación en tiempo constante     | `crypto.timingSafeEqual()` |
 
+### 👁️ Detección de Intrusiones (Blue Team)
+
+Para identificar los ataques en tiempo real y post-mortem, el Blue Team implementará los siguientes mecanismos de monitoreo:
+1. **Packet Sniffing en vboxnet0:** Uso de `tcpdump` o Wireshark para capturar tráfico HTTP. Al no contar con HTTPS en el entorno de laboratorio, payloads como `' UNION SELECT` y cookies en Base64 se detectan en texto plano.
+2. **Monitoreo de Logs de Aplicación:** Implementación de middleware (ej. Morgan en Express.js) para detectar ráfagas de errores HTTP 500 originados por errores de sintaxis en las inyecciones SQL.
+3. **Auditoría Forense de Base de Datos:** Inspección periódica del archivo `sqlite.db` en búsqueda de caracteres semánticos de HTML (`<script>`, `fetch`) dentro de los campos de texto (`content` en la tabla `messages`).
+4. **Detección de Falsificación de Sesión:** Correlación de la dirección IP de origen con el ID de sesión para detectar anomalías en el uso de cookies Base64.
+
 ---
 
 ## 🔗 Inventario de Endpoints
@@ -203,13 +211,13 @@ curl -X POST http://192.168.56.20:4000/api/register \
 
 ## 📊 Mapeo CWE → OWASP → CKC
 
-| CWE     | Descripción                                   | OWASP 2025   | Fase CKC       |
-|---------|-----------------------------------------------|--------------|----------------|
-| CWE-89  | SQL Injection                                 | A05:2025     | III + IV       |
-| CWE-79  | Stored XSS                                    | A05:2025     | III + V + VI   |
-| CWE-116 | Improper Output Encoding                      | A05:2025     | V              |
-| CWE-327 | Broken Cryptographic Algorithm (MD5)          | A04:2025     | II + VII       |
-| CWE-759 | One-Way Hash without Salt                     | A04:2025     | II + VII       |
-| CWE-916 | Insufficient Computational Effort             | A04:2025     | II + VII       |
-| CWE-345 | Insufficient Verification of Data Authenticity| A04:2025     | III + IV       |
-| CWE-311 | Missing Encryption of Sensitive Data          | A04:2025     | III + IV       |
+| CWE     | Descripción                                   | OWASP 2025   | Fase CKC       | Justificación OWASP |
+|---------|-----------------------------------------------|--------------|----------------|---------------------|
+| CWE-89  | SQL Injection                                 | A05:2025     | III + IV       | Debilidad fundacional de inyección en BD |
+| CWE-79  | Stored XSS                                    | A05:2025     | III + V + VI   | Inyección de código en el cliente |
+| CWE-116 | Improper Output Encoding                      | A05:2025     | V              | Permite ejecución de scripts (XSS) |
+| CWE-327 | Broken Cryptographic Algorithm (MD5)          | A04:2025     | II + VII       | Algoritmo obsoleto y roto criptográficamente |
+| CWE-759 | One-Way Hash without Salt                     | A04:2025     | II + VII       | Vulnerable a rainbow tables |
+| CWE-916 | Insufficient Computational Effort             | A04:2025     | II + VII       | Permite fuerza bruta veloz |
+| CWE-345 | Insufficient Verification of Data Authenticity| A04:2025     | III + IV       | Falta de firma (HMAC) permite manipulación |
+| CWE-311 | Missing Encryption of Sensitive Data          | A04:2025     | III + IV       | Información sensible en Base64 plano |

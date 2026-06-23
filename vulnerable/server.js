@@ -70,7 +70,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ─── Middleware de sesión (INSEGURO: cookie Base64 sin firma HMAC) ──────────
 // FALLA CRIPTOGRÁFICA: CWE-345, CWE-311
 // El servidor confía ciegamente en el contenido de la cookie sin verificación.
-// EXPLICACIÓN TÉCNICA DEL RIESGO: La cookie de sesión se decodifica directamente desde Base64 (que es un esquema de codificación, no de cifrado). Al carecer de una firma criptográfica (como HMAC), el servidor no tiene forma de verificar la integridad del payload. Un atacante puede interceptar su cookie, decodificarla, alterar sus valores (ej. cambiar su ID de usuario o rol a "admin"), volver a codificarla en Base64 y enviarla al servidor, logrando una escalada de privilegios inmediata al saltarse los controles de autenticación.
+// EXPLICACIÓN TÉCNICA DEL RIESGO: La cookie de sesión se decodifica directamente desde Base64 (que es un esquema de codificación, no de cifrado). Al carecer de una firma criptográfica (como HMAC), el servidor no tiene forma de verificar la integridad del payload. Un atacante puede interceptar su cookie, decodificarla, alterar sus valores (ej. cambiar su ID de usuario al ID de otro usuario), volver a codificarla en Base64 y enviarla al servidor, logrando secuestrar la sesión de otro usuario al saltarse los controles de autenticación.
 function getSession(req) {
   const cookieHeader = req.headers['cookie'] || '';
   const match = cookieHeader.match(/session=([^;]+)/);
@@ -143,7 +143,7 @@ app.post('/api/login', (req, res) => {
   }
 
   // FALLA CRIPTOGRÁFICA: sesión en Base64 plano, sin firma HMAC (CWE-345, CWE-311)
-  // Payload de manipulación: decodificar, cambiar role a "admin", re-codificar
+  // Payload de manipulación: decodificar, cambiar userId, re-codificar
   // EXPLICACIÓN TÉCNICA DEL RIESGO: Al emitir una cookie que almacena el estado (ID, rol) en texto plano (Base64) y sin un Message Authentication Code (MAC) adjunto, el cliente posee el control total sobre los datos de la sesión. El backend leerá y creerá cualquier valor modificado en futuras peticiones.
   const sessionPayload = JSON.stringify({ userId: user.id, username: user.username, role: user.role });
   const sessionCookie = Buffer.from(sessionPayload).toString('base64');
@@ -152,23 +152,15 @@ app.post('/api/login', (req, res) => {
   res.json({ message: 'Autenticado', userId: user.id, role: user.role });
 });
 
-// ─── ENDPOINT: GET /api/profile ──────────────────────────────────────────────
 // FALLA: El servidor lee la cookie Base64 y confía ciegamente (CWE-345)
-// FALLA: Si role=admin en la cookie, expone todos los usuarios y sus hashes
 app.get('/api/profile', (req, res) => {
   const session = getSession(req);
   if (!session) {
     return res.status(401).json({ error: 'No autenticado' });
   }
 
-  // FALLA: Confianza ciega en el rol que viene de la cookie sin verificar en BD
-  // EXPLICACIÓN TÉCNICA DEL RIESGO: La aplicación implementa Control de Acceso basado en datos del lado del cliente no verificados. Un atacante que adultere la cookie puede bypassar las restricciones de autorización.
-  if (session.role === 'admin') {
-    // FALLA: Exposición íntegra de la BD incluyendo hashes de contraseñas
-    // EXPLICACIÓN TÉCNICA DEL RIESGO: Devolver en la API datos sensibles como hashes de contraseñas en lugar de omitirlos o redactarlos permite ataques de fuerza bruta posteriores en caso de que un atacante consiga permisos de administrador.
-    const allUsers = db.prepare('SELECT id, username, password, role, email FROM users').all();
-    return res.json({ admin: true, users: allUsers });
-  }
+  // FALLA: Confianza ciega en el userId que viene de la cookie sin verificar su autenticidad
+  // EXPLICACIÓN TÉCNICA DEL RIESGO: Al carecer de firma HMAC, un atacante puede modificar el userId en la cookie Base64. El servidor confía ciegamente en este valor y devuelve los datos del usuario correspondiente, permitiendo el secuestro de sesión y vulnerando la confidencialidad de los datos.
 
   const user = db.prepare('SELECT id, username, role, email FROM users WHERE id = ?').get(session.userId);
   res.json({ user });

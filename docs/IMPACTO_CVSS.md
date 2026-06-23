@@ -6,6 +6,19 @@
 
 ---
 
+## Pertinencia de las CWE Seleccionadas (OWASP Top 10)
+
+| Categoría OWASP | CWE Mapeada | Justificación Oficial / Directriz |
+|-----------------|-------------|-----------------------------------|
+| **A05:2025 Inyección** | **CWE-89** (SQLi) | Reconocida por MITRE/OWASP como la debilidad fundacional de inyección en bases de datos. |
+| **A05:2025 Inyección** | **CWE-79** (XSS) | Mapeada clásicamente bajo Inyección debido a la inyección de código cliente. |
+| **A04:2025 Fallas Criptográficas** | **CWE-327** (Algoritmo Roto) | Asociada al uso de MD5, el cual es considerado obsoleto y criptográficamente roto. |
+| **A04:2025 Fallas Criptográficas** | **CWE-916** (Esfuerzo Insuficiente) | MD5 es excesivamente rápido para contraseñas, permitiendo ataques de fuerza bruta viables. |
+| **A04:2025 Fallas Criptográficas** | **CWE-759** (Hash sin Salt) | Falta de un valor aleatorio (salt) hace que los hashes sean vulnerables a rainbow tables. |
+| **A04:2025 Fallas Criptográficas** | **CWE-345/311** (Falta Autenticidad) | Falta de HMAC en las cookies permite manipulación de datos sensibles no encriptados. |
+
+---
+
 ## Vulnerabilidad 1: SQL Injection (CWE-89)
 
 **OWASP:** A05:2025 Inyección  
@@ -110,7 +123,7 @@ CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N
 ## Vulnerabilidad 4: Cookie Base64 sin HMAC (CWE-345, CWE-311)
 
 **OWASP:** A04:2025 Fallas Criptográficas  
-**Nota sobre observación de la profesora:** Esta vulnerabilidad fue identificada como Fallas Criptográficas y NO como Ruptura de Control de Acceso (A01:2025) porque el fallo estructural radica en la **ausencia de primitiva criptográfica** (HMAC), no en una lógica deficiente de control de acceso. La escalada de privilegios es una **consecuencia** del fallo criptográfico (CWE-345), no la causa.
+**Nota sobre observación de la profesora:** Esta vulnerabilidad fue identificada como Fallas Criptográficas (A04:2025) y NO como Ruptura de Control de Acceso (A01:2025). El fallo estructural radica en la **ausencia de primitiva criptográfica** (HMAC), no en una lógica deficiente de control de acceso per se. El ataque se enfoca en que la cookie contiene información sensible en texto plano codificado en Base64. El atacante la decodifica para leer datos confidenciales o secuestrar la sesión de otro usuario modificando el `userId` (CWE-345/CWE-311), sin involucrar una escalada de privilegios a administrador, para no solapar con A01.
 
 ### Vector CVSS v4.0
 
@@ -145,4 +158,4 @@ Cookie adulterada: eyJ1c2VySWQiOjJ9.FIRMA_INCORRECTA
 | SQLi /api/search      | 🔴 Alta          | 🟡 Media    | 🟢 Baja         | Extracción de hashes  |
 | Stored XSS Worm       | 🔴 Alta          | 🔴 Alta     | 🟢 Baja         | Secuestro de sesiones |
 | MD5 sin salt          | 🔴 Alta          | 🟢 Baja     | 🟢 Baja         | Cracking offline      |
-| Cookie Base64         | 🔴 Alta          | 🔴 Alta     | 🟢 Baja         | Escalada a admin      |
+| Cookie Base64         | 🔴 Alta          | 🔴 Alta     | 🟢 Baja         | Secuestro de sesiones     |

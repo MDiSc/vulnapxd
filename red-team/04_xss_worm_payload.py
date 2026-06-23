@@ -24,7 +24,7 @@ El payload XSS se construye como un script JavaScript asíncrono que:
      usuario que abra su bandeja de mensajes (persistencia — Instalación)
 
 FASE DE ENTREGA:
-  El payload se inyecta mediante POST /api/message con Content-Type: application/json.
+  La fase de entrega (Delivery) consiste en utilizar un proxy como Burp Suite. El atacante captura la petición POST HTTP legítima en texto plano, pausa la comunicación y manipula manualmente el cuerpo de la petición. Específicamente, inyecta el vector SQL o el gusano XSS directamente en los parámetros JSON del cuerpo (req.body) antes de enviarlo al servidor vulnerable.
   El contenido llega a Express como req.body.content sin sanitización alguna.
   Se almacena en la tabla 'messages' de SQLite tal cual.
 
