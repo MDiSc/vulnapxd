@@ -170,10 +170,9 @@ python3 red-team/06_verificacion_contramedidas.py
 ### 👁️ Detección de Intrusiones (Blue Team)
 
 Para identificar los ataques en tiempo real y post-mortem, el Blue Team implementará los siguientes mecanismos de monitoreo:
-1. **Packet Sniffing en vboxnet0:** Uso de `tcpdump` o Wireshark para capturar tráfico HTTP. Al no contar con HTTPS en el entorno de laboratorio, payloads como `' UNION SELECT` y cookies en Base64 se detectan en texto plano.
-2. **Monitoreo de Logs de Aplicación:** Implementación de middleware (ej. Morgan en Express.js) para detectar ráfagas de errores HTTP 500 originados por errores de sintaxis en las inyecciones SQL.
-3. **Auditoría Forense de Base de Datos:** Inspección periódica del archivo `sqlite.db` en búsqueda de caracteres semánticos de HTML (`<script>`, `fetch`) dentro de los campos de texto (`content` en la tabla `messages`).
-4. **Detección de Falsificación de Sesión:** Correlación de la dirección IP de origen con el ID de sesión para detectar anomalías en el uso de cookies Base64.
+1. **Observación de Datos en Tránsito:** Subrutina en Node.js que escucha los buffers de entrada (`req.on('data')`) e imprime en la consola (`console.log`) los payloads maliciosos en texto plano.
+2. **Registro y Correlación de Logs:** Uso de la función nativa `fs.appendFileSync()` para registrar en disco ráfagas de códigos HTTP 500 originados por errores de sintaxis en las inyecciones SQL.
+3. **Identificación Técnica Post-Explotación:** Interacción nativa con la base de datos usando `sqlite3 vulnapp.db` para realizar búsquedas forenses manuales (ej. `SELECT * FROM messages WHERE content LIKE '%<script>%';`).
 
 ---
 

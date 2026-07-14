@@ -92,7 +92,7 @@ def analyze_cookie(set_cookie_header):
             obj = json.loads(decoded)
             print(f"      → Campos: {obj}")
             if "role" in obj:
-                print(f"      → CAMPO 'role'={obj['role']} es manipulable para escalar privilegios")
+                print(f"      → CAMPO 'role'={obj['role']} expuesto en texto plano — dato sensible legible sin criptografía (CWE-311)")
         except Exception:
             pass
     except Exception:

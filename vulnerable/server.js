@@ -67,6 +67,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+const LOG_FILE = './intrusion_log.txt';
+
+// CONTRAMEDIDA (MONITOREO PASIVO): Observación de Datos en Tránsito
+app.use((req, res, next) => {
+  req.on('data', (chunk) => {
+    console.log(`[MONITOR] ${req.method} ${req.url} | Body chunk: ${chunk.toString().substring(0, 200)}`);
+  });
+  next();
+});
 // ─── Middleware de sesión (INSEGURO: cookie Base64 sin firma HMAC) ──────────
 // FALLA CRIPTOGRÁFICA: CWE-345, CWE-311
 // El servidor confía ciegamente en el contenido de la cookie sin verificación.
@@ -256,9 +265,16 @@ app.get('/api/messages', (req, res) => {
   res.json({ messages: msgs });
 });
 
+// CONTRAMEDIDA (MONITOREO PASIVO): Registro de logs nativo
+app.use((err, req, res, next) => {
+  const logEntry = `[${new Date().toISOString()}] HTTP 500 | ${req.method} ${req.url} | ${err.message}\n`;
+  fs.appendFileSync(LOG_FILE, logEntry);
+  res.status(500).json({ error: err.message });
+});
+
 // ─── Inicia el servidor ──────────────────────────────────────────────────────
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(\`[VulnApp VULNERABLE] Backend corriendo en http://0.0.0.0:\${PORT}\`);
+  console.log(`[VulnApp VULNERABLE] Backend corriendo en http://0.0.0.0:${PORT}`);
   console.log('ADVERTENCIA: Este servidor es deliberadamente inseguro. Solo para uso en laboratorio.');
 });

