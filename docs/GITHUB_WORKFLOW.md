@@ -80,25 +80,29 @@ git pull origin version-vulnerable
 ```
 
 ### 3.1 — Maurizio Brazón: Reconocimiento + Exploit SQLi
-Debe agregar sus scripts en la carpeta `red-team/` y hacer commits documentados.
-Ejemplo de commit:
+✅ **Estado en Repositorio Oficial:** Commit parcial ya realizado (`red(exploit): Reconocimiento manual y SQLi`).
+
+⚠️ **ACCIÓN REQUERIDA (Correcciones v8):**
+Dado que el commit anterior se hizo con la versión antigua, Maurizio debe hacer un nuevo commit para:
+1. Subir los archivos base de la aplicación vulnerable (frontend y backend) con los mecanismos de monitoreo nativo (Corrección #5).
+2. Actualizar `01_reconocimiento.py` con la nueva terminología de CWE-311 (Corrección #1).
+3. Actualizar `README.md` (Corrección #5) y `docs/PAYLOADS_REFERENCIA.txt` (Corrección #2).
+
+Ejemplo del commit de corrección que debe realizar:
 ```bash
-git add red-team/01_reconocimiento.py red-team/02_exploit_sqli.py
-git commit -m "red(exploit): Fases I-IV - Reconocimiento manual y SQLi (CWE-89)"
+git add vulnerable/ README.md docs/PAYLOADS_REFERENCIA.txt red-team/01_reconocimiento.py
+git commit -m "red(correcciones-v8): Ajuste CWE-311 en reconocimiento y monitoreo pasivo nativo"
 git push origin version-vulnerable
 ```
 
 ### 3.2 — César Sánchez: XSS Worm + C2
-Debe agregar sus scripts de XSS en la carpeta del Red Team.
-Ejemplo de commit:
-```bash
-git add red-team/04_xss_worm_payload.py
-git commit -m "red(exploit): Fases V-VI - XSS Worm autorreplicante (CWE-79/116)"
-git push origin version-vulnerable
-```
+✅ **Estado en Repositorio Oficial:** Commit ya realizado (`red(exploit): XSS Worm autorreplicante`).
+**Nota:** El payload XSS no fue afectado por las correcciones v8. No necesita hacer commits de arreglo.
 
 ### 3.3 — Eduard Velasco: Cookie Tampering + Hashcat
-Debe documentar el abuso criptográfico y los scripts de cracking.
+⏳ **Estado:** Pendiente.
+Debe agregar sus scripts asegurándose de tomar la **versión ya corregida (v8)** de `03_exploit_cookie_tampering.py` desde el repositorio borrador (`vulnapxd`), la cual prioriza la extracción de datos sobre la manipulación (Corrección #1).
+
 Ejemplo de commit:
 ```bash
 git add red-team/03_exploit_cookie_tampering.py red-team/05_hashcat_demo.sh
