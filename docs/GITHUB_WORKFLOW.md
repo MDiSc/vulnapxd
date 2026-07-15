@@ -86,12 +86,13 @@ git pull origin version-vulnerable
 Dado que el commit anterior se hizo con la versión antigua, Maurizio debe hacer un nuevo commit para:
 1. Subir los archivos base de la aplicación vulnerable (frontend y backend) con los mecanismos de monitoreo nativo (Corrección #5).
 2. Actualizar `01_reconocimiento.py` con la nueva terminología de CWE-311 (Corrección #1).
-3. Actualizar `README.md` (Corrección #5) y `docs/PAYLOADS_REFERENCIA.txt` (Corrección #2).
+
+*(Nota: Los archivos de documentación finales como el `README.md` técnico y `PAYLOADS_REFERENCIA.txt` son entregables de la **Etapa 2**, por lo que no es necesario subirlos en esta fase).*
 
 Ejemplo del commit de corrección que debe realizar:
 ```bash
-git add vulnerable/ README.md docs/PAYLOADS_REFERENCIA.txt red-team/01_reconocimiento.py
-git commit -m "red(correcciones-v8): Ajuste CWE-311 en reconocimiento y monitoreo pasivo nativo"
+git add vulnerable/ red-team/01_reconocimiento.py
+git commit -m "red(correcciones-v8): Ajuste CWE-311 en reconocimiento y base vulnerable con monitoreo nativo"
 git push origin version-vulnerable
 ```
 
