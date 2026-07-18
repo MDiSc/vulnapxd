@@ -48,6 +48,32 @@ Este repositorio contiene código **deliberadamente inseguro** con propósitos *
 
 ---
 
+## 🏛 Arquitectura de la Aplicación
+
+```mermaid
+graph TD
+    A[Atacante / Kali Linux] -->|HTTP / Puerto 4000| B(Node.js / Express.js)
+    B -->|Consultas DB nativas| C[(SQLite3 Database)]
+    C -->|Devuelve registros| B
+    B -->|Renderiza HTML/JSON| A
+```
+
+## 🔄 Diagrama de Flujo de Datos (Ataque)
+
+```mermaid
+sequenceDiagram
+    participant Atacante
+    participant VulnApp (Node.js)
+    participant BaseDeDatos (SQLite)
+    Atacante->>VulnApp: POST /api/login (Payload: ' OR '1'='1'--)
+    VulnApp->>BaseDeDatos: SELECT * FROM users WHERE user='' OR '1'='1'--'
+    BaseDeDatos-->>VulnApp: Primer registro (admin)
+    VulnApp-->>Atacante: Set-Cookie: session=<Base64>
+    Note over Atacante,VulnApp: Compromiso de Integridad y Confidencialidad
+```
+
+---
+
 ## 📁 Estructura del Repositorio
 
 ```

