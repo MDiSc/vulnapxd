@@ -246,7 +246,8 @@
   ```
 * 🗣️ **Lo que dices en la narración del video:**
   > *"Avanzamos a la Fase VI: Comando y Control (C2). Aquí establecemos un canal de exfiltración pasivo.*  
-  > *Levantamos un servidor de escucha en nuestra máquina atacante Kali Linux mediante Python. El Worm XSS que dejamos incrustado en la base de datos utiliza la API nativa `fetch()` del navegador vulnerado para enviar beacons automatizados, entregando las cookies de sesión robadas directamente a nuestro control de manera silenciosa y efectiva."*
+  > *Levantamos un servidor de escucha en nuestra máquina atacante Kali Linux mediante Python. El Worm XSS que dejamos incrustado en la base de datos utiliza el Event Handler `onerror` de una etiqueta de imagen rota para realizar un bypass de las restricciones de `innerHTML`.*  
+  > *Este Image Beacon obliga al navegador vulnerado a enviar peticiones automatizadas, entregando las cookies de sesión robadas directamente a nuestro control de manera silenciosa, efectiva, y evadiendo las políticas de CORS de los navegadores modernos."*
 
 ---
 
@@ -261,5 +262,27 @@
   > *"Finalmente, entramos en la Fase VII: Acciones sobre los Objetivos. El ciclo culmina con la vulneración absoluta de los pilares de Confidencialidad, Integridad y Disponibilidad.*  
   > *Como equipo ofensivo (Red Team), logramos la evasión del mecanismo de autenticación y la extracción íntegra de la base de datos, exponiendo contraseñas almacenadas bajo un algoritmo obsoleto, evidenciando **CWE-759** y **CWE-916**.*  
   > *Paralelamente, concretamos un Secuestro de Cuentas a escala global (Account Takeover), logrando acceso irrestricto y cumpliendo exitosamente con los objetivos destructivos de la intrusión. Finalizamos la demostración del ataque y cedemos el paso a la respuesta de incidentes."*
+
+---
+
+# 🔵 FASE VIII: REMEDIACIÓN Y DEFENSA (BLUE TEAM)
+
+---
+
+### PASO 8.1: Presentación de los Parches de Seguridad (Defensa en Profundidad)
+
+* 🖥️ **Acción Visual:** Muestras en pantalla dividida o de manera secuencial los fragmentos de código del archivo `secure/server.js` (si existe) o las diapositivas de la presentación donde se aprecian las correcciones implementadas en el código Node.js.
+* 🗣️ **Lo que dices en la narración del video:**
+  > *"Habiendo demostrado el impacto crítico de las vulnerabilidades, asumimos el rol defensivo (Blue Team) para aplicar las medidas de remediación y asegurar la plataforma basándonos en las mejores prácticas de la industria y mitigando el OWASP Top 10:*  
+  >  
+  > *1. **Mitigación de Inyección SQL (CWE-89):** Reemplazamos la concatenación insegura de cadenas por consultas preparadas (Prepared Statements) utilizando la API paramétrica de `better-sqlite3`. Esto asegura que el motor de la base de datos restrinja las entradas estrictamente a literales de datos, neutralizando cualquier intento de alterar el Árbol de Sintaxis Abstracta (AST).*  
+  >  
+  > *2. **Defensa contra XSS (CWE-79 / CWE-116):** Para el XSS Almacenado, implementamos la sanitización de salida (Output Encoding) y abandonamos el uso de la propiedad insegura `innerHTML` en el frontend, reemplazándola por `textContent`, lo cual obliga al navegador a tratar los datos estrictamente como texto plano y no como código ejecutable.*  
+  >  
+  > *3. **Autenticidad de Sesiones (CWE-345):** Para prevenir el Cookie Tampering y el Secuestro de Sesión, implementamos un Código de Autenticación de Mensajes basado en Hash (HMAC) utilizando `crypto.createHmac` con una clave secreta fuerte del lado del servidor. Esto garantiza la integridad criptográfica de la sesión.*  
+  >  
+  > *4. **Protección de Credenciales (CWE-327 / CWE-759):** Finalmente, erradicamos el uso del algoritmo obsoleto MD5 y lo reemplazamos por algoritmos robustos de derivación de claves como **scrypt** o **Argon2**, acompañados de un 'Salt' único generado criptográficamente, haciendo inviables los ataques de diccionario y el uso de Rainbow Tables.*  
+  >  
+  > *Con la implementación de estas capas defensivas, la plataforma queda blindada contra los vectores de ataque explotados, garantizando de nuevo la Confidencialidad, Integridad y Disponibilidad del sistema. Muchas gracias."*
 
 ---
