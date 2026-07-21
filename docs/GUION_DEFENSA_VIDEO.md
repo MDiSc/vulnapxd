@@ -166,3 +166,39 @@
   > *La etiqueta `<script>` con el código malicioso viaja directamente dentro de la propiedad `content` de `req.body`. El servidor procesa y almacena este contenido en la base de datos sin aplicar filtros de entrada ni escape de caracteres, completando exitosamente la entrega de todos nuestros vectores de ataque."*
 
 ---
+
+# 🔴 FASE IV: EXPLOTACIÓN (EXPLOITATION)
+
+---
+
+### PASO 4.1: Explotación de Inyección SQL (CWE-89) en el Backend Node.js / SQLite
+
+* 🖥️ **Acción Visual:** Se observa en la terminal la respuesta `HTTP 200 OK` con la cookie de sesión emitida tras el bypass en `/api/login`, y la ejecución de la consulta `UNION SELECT` en el endpoint `/api/search`.
+* ⌨️ **Comando a escribir:**
+  ```bash
+  curl -i -X POST http://192.168.56.20:4000/api/search \
+       -H "Content-Type: application/json" \
+       -H "Cookie: session=$COOKIE_VAL" \
+       -d '{"query": "'\'' UNION SELECT username, password, email FROM users--"}'
+  ```
+* 🗣️ **Lo que dices en la narración del video:**
+  > *"Pasamos a la Fase IV: Explotación. En esta etapa se materializan las fallas estructurales derivadas de la programación insegura.*  
+  > *Respecto a **CWE-89 (Inyección SQL)**, el backend desarrollado en Node.js concatena los payloads inyectados directamente dentro de las directivas de SQLite sin emplear parametrización ni consultas preparadas. Esto altera de forma directa el árbol de ejecución lógico del motor relacional `better-sqlite3`.*  
+  > *Como pueden apreciar en pantalla, al ejecutar la búsqueda inyectada en `/api/search`, logramos forzar al motor de base de datos a retornar los registros completos de la tabla de usuarios, incluyendo nombres, correos y hashes de contraseñas."*
+
+---
+
+### PASO 4.2: Explotación de la Cookie Adulterada por Falta de HMAC (CWE-345 y CWE-311)
+
+* 🖥️ **Acción Visual:** Muestras la respuesta `HTTP 200 OK` del endpoint `/api/profile` devolviendo la información completa del usuario `id: 1` (`admin@vulnapp.local`).
+* ⌨️ **Comando a escribir:**
+  ```bash
+  curl -i -X GET http://192.168.56.20:4000/api/profile \
+       -H "Cookie: session=$COOKIE_VAL"
+  ```
+* 🗣️ **Lo que dices en la narración del video:**
+  > *"En relación con **CWE-345 (Verificación Insuficiente de Autenticidad)** y **CWE-311 (Falta de Cifrado)**, el middleware de autorización del servidor valida a ciegas el estado de la sesión presente en la cookie.*  
+  > *Al enviar la cookie adulterada en Base64, el servidor lee el objeto JSON sin verificar su integridad, debido a la ausencia total de un Código de Autenticación de Mensajes basado en Hash (HMAC).*  
+  > *Como observan en el cuerpo de la respuesta, el backend procesa la petición y nos otorga acceso completo a los datos del usuario ID 1 (`admin`), confirmando la materialización de la falla arquitectónica en la gestión de sesiones."*
+
+---
