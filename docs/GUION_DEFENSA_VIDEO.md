@@ -223,7 +223,7 @@
   ```bash
   sqlite3 vulnapp.db "SELECT id, content FROM messages WHERE id=(SELECT max(id) FROM messages);"
   ```
-  *(Nota para el video: Asegúrate de estar posicionado en el directorio `vulnapp` y que la base de datos contenga la tabla `messages`, la cual se crea automáticamente al iniciar el servidor)*
+  *(Nota para el video: Asegúrate de estar posicionado en el directorio `vulnapp/vulnerable` antes de ejecutar el comando, ya que ahí se encuentra la base de datos real con los registros inyectados)*
 * 🗣️ **Lo que dices en la narración del video:**
   > *"Entramos en la Fase V: Instalación. En esta etapa, consolidamos la persistencia dentro del entorno vulnerado.*  
   > *Como pueden observar al consultar directamente el archivo de la base de datos relacional, el payload XSS que entregamos en la fase anterior se ha inscrito de manera definitiva y permanente.*  
