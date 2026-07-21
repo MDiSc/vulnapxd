@@ -71,11 +71,11 @@
 * 🖥️ **Acción Visual:** En la terminal de Kali, creas directamente el archivo JSON con el payload de SQLi y lo verificas.
 * ⌨️ **Comando a escribir:**
   ```bash
-  echo "{\"username\": \"' OR 1=1 --\", \"password\": \"x\"}" > payload_sqli.json
+  echo "{\"username\": \"' OR 1=1 /*\", \"password\": \"x\"}" > payload_sqli.json
   cat payload_sqli.json
   ```
 * 🗣️ **Lo que dices mientras tipeas el comando y muestras el archivo `payload_sqli.json`:**
-  > *"Pasamos a la Fase II: Armamento. Para la vulnerabilidad **OWASP A05:2025 Inyección (CWE-89)**, preparamos el archivo `payload_sqli.json`. El backend procesa la consulta de autenticación concatenando directamente el parámetro `username`. Construimos un payload de inyección SQL `' OR 1=1 --` que inyecta una tautología lógica. Al procesarse en la base de datos SQLite, la cláusula `WHERE` se evalúa siempre como verdadera (`TRUE`), neutralizando la verificación de contraseña y permitiendo el acceso no autorizado como primer usuario del sistema."*
+  > *"Pasamos a la Fase II: Armamento. Para la vulnerabilidad **OWASP A05:2025 Inyección (CWE-89)**, preparamos el archivo `payload_sqli.json`. El backend procesa la consulta de autenticación concatenando directamente el parámetro `username`. Construimos un payload de inyección SQL `' OR 1=1 /*` que inyecta una tautología lógica. El delimitador `/*` (comentario en bloque) anula la verificación sintáctica restante. Al procesarse, la cláusula `WHERE` se evalúa siempre como verdadera (`TRUE`), neutralizando la verificación de contraseña y permitiendo el acceso no autorizado como primer usuario del sistema."*
 
 ---
 
