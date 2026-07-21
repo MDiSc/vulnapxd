@@ -117,3 +117,52 @@
   > *"Finalmente, para la vulnerabilidad **OWASP A05:2025 Stored XSS (CWE-79 y CWE-116)**, creamos el archivo `payload_xss.json`. Diseñamos una etiqueta `<script>` que, al ser inyectada y renderizada por el `innerHTML` del cliente, enviará asíncronamente la cookie de la víctima hacia nuestro listener C2 en `192.168.56.10:8888`. Con esto completamos el armamento de nuestros cuatro vectores de ataque."*
 
 ---
+
+# 🔴 FASE III: ENTREGA (DELIVERY)
+
+---
+
+### PASO 3.1: Entrega del vector SQL Injection en `/api/login`
+
+* 🖥️ **Acción Visual:** En la terminal de Kali Linux, ejecutas la transmisión del vector SQLi enviando el archivo `payload_sqli.json` mediante `curl`.
+* ⌨️ **Comando a escribir:**
+  ```bash
+  curl -i -X POST http://192.168.56.20:4000/api/login \
+       -H "Content-Type: application/json" \
+       -d @payload_sqli.json
+  ```
+* 🗣️ **Lo que dices mientras ejecutas el comando y se recibe el `HTTP 200 OK`:**
+  > *"Iniciamos la Fase III: Entrega. La transmisión de nuestros vectores maliciosos se orquesta de manera puramente manual mediante `curl`, eludiendo por completo el uso de escáneres o herramientas automatizadas.*  
+  > *En este primer paso, transmitimos el vector de Inyección SQL enviando el archivo `payload_sqli.json` como cuerpo de la petición hacia `/api/login`. El payload viaja dentro de la estructura JSON en la variable `username`. Al llegar al servidor, el middleware `express.json()` lo procesa e inyecta directamente en la consulta del backend sin sanitización previa, logrando el bypass de autenticación instantáneo."*
+
+---
+
+### PASO 3.2: Entrega de la Cookie Adulterada en `/api/profile` (Cookie Tampering)
+
+* 🖥️ **Acción Visual:** Lees el contenido de `cookie_adulterada.txt` y lo inyectas directamente dentro de la cabecera HTTP `Cookie: session=...` al consultar `/api/profile`.
+* ⌨️ **Comando a escribir:**
+  ```bash
+  COOKIE_VAL=$(cat cookie_adulterada.txt) && curl -i -X GET http://192.168.56.20:4000/api/profile \
+       -H "Cookie: session=$COOKIE_VAL"
+  ```
+* 🗣️ **Lo que dices mientras ejecutas el comando y ves la respuesta en pantalla:**
+  > *"Continuando con la entrega de vectores, inyectamos la cookie adulterada almacenada en `cookie_adulterada.txt` directamente dentro de las cabeceras HTTP de la petición GET hacia `/api/profile`.*  
+  > *Este vector es transmitido directamente a nivel de protocolo HTTP antes de que alcance el middleware de control de sesión en Express.js. Como el servidor carece de verificación de integridad HMAC (CWE-345), la cabecera es procesada limpiamente por el backend, demostrando la entrega exitosa del vector de suplantación."*
+
+---
+
+### PASO 3.3: Entrega del payload Stored XSS en `/api/message`
+
+* 🖥️ **Acción Visual:** Transmites el archivo `payload_xss.json` mediante una petición POST al endpoint de mensajería `/api/message`.
+* ⌨️ **Comando a escribir:**
+  ```bash
+  curl -i -X POST http://192.168.56.20:4000/api/message \
+       -H "Content-Type: application/json" \
+       -H "Cookie: session=$COOKIE_VAL" \
+       -d @payload_xss.json
+  ```
+* 🗣️ **Lo que dices mientras ejecutas el comando y sale `HTTP 200 OK`:**
+  > *"Finalmente, entregamos el vector de Stored XSS transmitiendo el cuerpo JSON del archivo `payload_xss.json` hacia el endpoint de mensajería interna `/api/message`.*  
+  > *La etiqueta `<script>` con el código malicioso viaja directamente dentro de la propiedad `content` de `req.body`. El servidor procesa y almacena este contenido en la base de datos sin aplicar filtros de entrada ni escape de caracteres, completando exitosamente la entrega de todos nuestros vectores de ataque."*
+
+---
