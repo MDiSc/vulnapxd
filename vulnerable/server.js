@@ -157,7 +157,7 @@ app.post('/api/login', (req, res) => {
   const sessionPayload = JSON.stringify({ userId: user.id, username: user.username, role: user.role });
   const sessionCookie = Buffer.from(sessionPayload).toString('base64');
 
-  res.setHeader('Set-Cookie', `session=${sessionCookie}; Path=/; HttpOnly=false`);
+  res.setHeader('Set-Cookie', `session=${sessionCookie}; Path=/`);
   res.json({ message: 'Autenticado', userId: user.id, role: user.role });
 });
 
