@@ -230,3 +230,34 @@
   > *La total ausencia de codificación de salida o sanitización en el backend permite este almacenamiento letal. Más grave aún, el uso de la propiedad insegura `innerHTML` en el frontend (incurriendo en **CWE-79** y **CWE-116**) garantiza que este código parasitario se descargue del servidor y se despliegue recurrentemente, ejecutándose en el navegador de cualquier víctima legítima que interactúe con el panel de mensajes del sistema."*
 
 ---
+
+# 🔴 FASE VI: COMANDO Y CONTROL (C2)
+
+---
+
+### PASO 6.1: Establecimiento del Canal de Exfiltración Pasivo
+
+* 🖥️ **Acción Visual:** Se muestra en la pantalla (preferiblemente dividida) una terminal en Kali Linux ejecutando un servidor HTTP en el puerto 8888 mediante Python, y en otra ventana el momento en que se captura una cookie robada cuando una víctima navega por el sistema.
+* ⌨️ **Comando a escribir (en Kali):**
+  ```bash
+  python3 -m http.server 8888
+  ```
+* 🗣️ **Lo que dices en la narración del video:**
+  > *"Avanzamos a la Fase VI: Comando y Control (C2). Aquí establecemos un canal de exfiltración pasivo.*  
+  > *Levantamos un servidor de escucha en nuestra máquina atacante Kali Linux mediante Python. El Worm XSS que dejamos incrustado en la base de datos utiliza la API nativa `fetch()` del navegador vulnerado para enviar beacons automatizados, entregando las cookies de sesión robadas directamente a nuestro control de manera silenciosa y efectiva."*
+
+---
+
+# 🔴 FASE VII: ACCIONES SOBRE LOS OBJETIVOS (ACTIONS ON OBJECTIVES)
+
+---
+
+### PASO 7.1: Vulneración Absoluta y Cierre de la Fase Ofensiva
+
+* 🖥️ **Acción Visual:** Se muestran brevemente en pantalla los resultados combinados de la intrusión: los hashes extraídos (fase 4), la captura de cookies (fase 6) y el acceso a la cuenta del administrador.
+* 🗣️ **Lo que dices en la narración del video:**
+  > *"Finalmente, entramos en la Fase VII: Acciones sobre los Objetivos. El ciclo culmina con la vulneración absoluta de los pilares de Confidencialidad, Integridad y Disponibilidad.*  
+  > *Como equipo ofensivo (Red Team), logramos la evasión del mecanismo de autenticación y la extracción íntegra de la base de datos, exponiendo contraseñas almacenadas bajo un algoritmo obsoleto, evidenciando **CWE-759** y **CWE-916**.*  
+  > *Paralelamente, concretamos un Secuestro de Cuentas a escala global (Account Takeover), logrando acceso irrestricto y cumpliendo exitosamente con los objetivos destructivos de la intrusión. Finalizamos la demostración del ataque y cedemos el paso a la respuesta de incidentes."*
+
+---
