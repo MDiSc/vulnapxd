@@ -211,3 +211,21 @@
   > *Como observan en el cuerpo de la respuesta, el backend procesa la petición y nos otorga acceso completo a los datos del usuario ID 1 (`admin`), confirmando la materialización de la falla arquitectónica en la gestión de sesiones."*
 
 ---
+
+# 🔴 FASE V: INSTALACIÓN / PERSISTENCIA (INSTALLATION)
+
+---
+
+### PASO 5.1: Persistencia del Vector Stored XSS en la Base de Datos (CWE-79 y CWE-116)
+
+* 🖥️ **Acción Visual:** Muestras la terminal ejecutando una consulta `sqlite3` directa a la base de datos `vulnapp.db` evidenciando que el script malicioso se guardó textualmente.
+* ⌨️ **Comando a escribir:**
+  ```bash
+  sqlite3 ../vulnerable/vulnapp.db "SELECT id, content FROM messages WHERE id=(SELECT max(id) FROM messages);"
+  ```
+* 🗣️ **Lo que dices en la narración del video:**
+  > *"Entramos en la Fase V: Instalación. En esta etapa, consolidamos la persistencia dentro del entorno vulnerado.*  
+  > *Como pueden observar al consultar directamente el archivo de la base de datos relacional, el payload XSS que entregamos en la fase anterior se ha inscrito de manera definitiva y permanente.*  
+  > *La total ausencia de codificación de salida o sanitización en el backend permite este almacenamiento letal. Más grave aún, el uso de la propiedad insegura `innerHTML` en el frontend (incurriendo en **CWE-79** y **CWE-116**) garantiza que este código parasitario se descargue del servidor y se despliegue recurrentemente, ejecutándose en el navegador de cualquier víctima legítima que interactúe con el panel de mensajes del sistema."*
+
+---
