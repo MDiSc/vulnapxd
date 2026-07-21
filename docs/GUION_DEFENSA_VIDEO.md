@@ -221,7 +221,7 @@
 * 🖥️ **Acción Visual:** Muestras la terminal ejecutando una consulta `sqlite3` directa a la base de datos `vulnapp.db` evidenciando que el script malicioso se guardó textualmente.
 * ⌨️ **Comando a escribir:**
   ```bash
-  sqlite3 ../vulnerable/vulnapp.db "SELECT id, content FROM messages WHERE id=(SELECT max(id) FROM messages);"
+  sqlite3 vulnapp.db "SELECT id, content FROM messages WHERE id=(SELECT max(id) FROM messages);"
   ```
 * 🗣️ **Lo que dices en la narración del video:**
   > *"Entramos en la Fase V: Instalación. En esta etapa, consolidamos la persistencia dentro del entorno vulnerado.*  
