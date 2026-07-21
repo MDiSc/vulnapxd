@@ -96,14 +96,14 @@
 
 ### PASO 2.3: Preparación del entorno de cracking MD5 con Hashcat
 
-* 🖥️ **Acción Visual:** Creas el archivo del hash de prueba y verificas la lista `rockyou.txt`.
+* 🖥️ **Acción Visual:** Creas el archivo del hash de prueba y verificas la lista de contraseñas.
 * ⌨️ **Comando a escribir:**
   ```bash
   echo "0192023a7bbd73250516f069df18b500" > target_hash.txt
-  ls -lh /usr/share/wordlists/rockyou.txt
+  ls -lh /usr/share/wordlists/rockyou.txt 2>/dev/null || ls -lh /usr/share/wordlists/rockyou.txt.gz
   ```
 * 🗣️ **Lo que dices mientras ejecutas ambos comandos:**
-  > *"Para vulnerar las credenciales que exfiltraremos de la base de datos, armamos el entorno de análisis sobre **CWE-327 (MD5 Obsoleto)**, **CWE-759 (MD5 sin Sal)** y **CWE-916 (Esfuerzo Criptográfico Insuficiente)**. Guardamos el hash de prueba en `target_hash.txt` y confirmamos que la lista `rockyou.txt` está lista para ser procesada con Hashcat en modo `-m 0`."*
+  > *"Para vulnerar las credenciales que exfiltraremos de la base de datos, armamos el entorno de análisis sobre **CWE-327 (MD5 Obsoleto)**, **CWE-759 (MD5 sin Sal)** y **CWE-916 (Esfuerzo Criptográfico Insuficiente)**. Guardamos el hash de prueba en `target_hash.txt` y verificamos la disponibilidad de nuestro diccionario en Kali Linux para ser procesado con Hashcat en modo `-m 0`."*
 
 ---
 
