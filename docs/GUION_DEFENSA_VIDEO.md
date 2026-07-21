@@ -1,86 +1,95 @@
-# 🎬 Guión Técnico y Narrativo — Video de Defensa del Proyecto VulnApp
+# 🎬 Guión Técnico Escénico y Narrativo — Video de Defensa (Fases I y II)
 
 > **Universidad Católica Andrés Bello · Facultad de Ingeniería · Ciberseguridad**  
-> **Asignatura:** Ciberseguridad · **Profesora:** Francis Ferrer  
 > **Proyecto:** VulnApp — Simulación Red Team / Blue Team  
-> **Entorno:** VirtualBox Host-Only (`192.168.56.10` Kali Linux Atacante / `192.168.56.20` Ubuntu Server Víctima)
+> **Formato:** Guión de Acción Simultánea (Lo que se ejecuta en pantalla + Lo que se habla palabra por palabra)
 
 ---
 
-## 📌 ESTRUCTURA DEL GUIÓN (FASE RED TEAM)
+# 🟢 FASE I: RECONOCIMIENTO (RECONNAISSANCE)
 
 ---
 
-### 🟢 FASE I: RECONOCIMIENTO (Reconnaissance)
-**Objetivo:** Identificar la superficie de ataque del servidor expuesto, mapear dinámicamente sus endpoints de API y descubrir deficiencias estructurales en las cabeceras de gestión de sesión HTTP sin realizar inyecciones ni modificaciones activas en la base de datos.
+### PASO 1.1: Apertura de la sesión y fuzzing activo con `ffuf`
 
-#### 1.1 Enumeración Activa de Endpoints con `ffuf`
+* 🖥️ **Acción Visual:**
+  El estudiante abre la terminal de Kali Linux (`192.168.56.10`), se posiciona en el escritorio y escribe el comando de fuzzing con `ffuf`. Mientras el comando ejecuta, se ve cómo van saliendo las rutas HTTP con sus códigos de respuesta `200` y `401`.
 
-* **Comando a ejecutar en Kali Linux:**
+* ⌨️ **Comando a ejecutar:**
   ```bash
   ffuf -u http://192.168.56.20:4000/FUZZ -w /usr/share/wordlists/dirb/common.txt -mc 200,401,403,405 -t 10
   ```
 
-* **Acción en Pantalla:**
-  Se muestra la consola de Kali ejecutando `ffuf`. En cuestión de segundos se aprecian los códigos de respuesta HTTP `200` y `401` revelando los recursos `/api/login`, `/api/register`, `/api/profile`, `/api/search` y `/api/message`.
-
-* **Narrativa en el Video (Voz en off / Estudiante):**
-  > *"Damos inicio a la Fase I de la metodología Cyber Kill Chain: Reconocimiento. En lugar de emplear escáneres masivos automatizados prohibidos por la norma del laboratorio, utilizamos la herramienta de fuzzing de alto rendimiento `ffuf`. Mediante peticiones HTTP GET y POST controladas hacia la dirección IP de la víctima (192.168.56.20 en puerto 4000), analizamos los códigos de estado devueltos para mapear la superficie de ataque expuesta. Logramos identificar con precisión los endpoints neurálgicos de la API de la aplicación: `/api/login`, `/api/register`, `/api/search` y `/api/message`."*
+* 🗣️ **Guión Hablado (Decir esto exactamente mientras ejecuta en pantalla):**
+  > *"Saludos a todos. Damos inicio formal a la demostración práctica de nuestro proyecto de Ciberseguridad, comenzando con el despliegue del Red Team bajo el marco metodológico Cyber Kill Chain. Nos encontramos en la primera etapa: la Fase I de Reconocimiento.*  
+  > *En estricto cumplimiento con los lineamientos del laboratorio y rechazando el uso de escáneres masivos automatizados de vulnerabilidades, procedemos a realizar un mapeo de la superficie de ataque utilizando la herramienta de fuzzing nativa `ffuf`. Estamos enviando peticiones HTTP controladas a la dirección IP de nuestro servidor objetivo en Ubuntu Server, `192.168.56.20`, operando en el puerto 4000.*  
+  > *Como pueden observar en tiempo real en la pantalla, al evaluar las respuestas y códigos de estado HTTP devueltos por la aplicación, logramos descubrir la existencia de los endpoints principales de la API REST: `/api/login`, `/api/register`, `/api/search` y `/api/message`. Estos puntos de entrada representan la superficie de exposición sobre la cual analizaremos la seguridad del sistema."*
 
 ---
 
-#### 1.2 Registro e Inicio de Sesión Legítimo (Comprobación de Cabeceras)
+### PASO 1.2: Registro de un usuario estándar legítimo
 
-* **Comando 1 (Registro de usuario de prueba):**
+* 🖥️ **Acción Visual:**
+  En la misma terminal, el estudiante escribe el comando `curl` para enviar una petición HTTP POST al endpoint `/api/register` creando el usuario de pruebas.
+
+* ⌨️ **Comando a ejecutar:**
   ```bash
   curl -i -X POST http://192.168.56.20:4000/api/register \
        -H "Content-Type: application/json" \
        -d '{"username": "usuario_prueba", "password": "password123"}'
   ```
 
-* **Comando 2 (Autenticación e inspección de cabeceras HTTP):**
+* 🗣️ **Guión Hablado (Decir esto exactamente mientras se presiona Enter y aparece `201 Created`):**
+  > *"Una vez identificada la superficie de exposición, nos disponemos a estudiar el comportamiento normal de la aplicación sin alterar ni comprometer el sistema. Para ello, interactuamos directamente con el endpoint de registro `/api/register` enviando un objeto JSON limpio que contiene las credenciales de un usuario estándar de pruebas.*  
+  > *Al presionar Enter, observamos que el servidor backend desarrollado en Node.js y Express nos responde con un código de estado `HTTP 201 Created`, confirmando que la cuenta ha sido dada de alta correctamente en la base de datos."*
+
+---
+
+### PASO 1.3: Autenticación e inspección de cabeceras HTTP (`Set-Cookie`)
+
+* 🖥️ **Acción Visual:**
+  El estudiante escribe el comando `curl -i` para autenticarse en `/api/login`. Al recibir la respuesta, utiliza el puntero del ratón para sombreado/resaltar la cabecera `Set-Cookie` que aparece en la terminal.
+
+* ⌨️ **Comando a ejecutar:**
   ```bash
   curl -i -X POST http://192.168.56.20:4000/api/login \
        -H "Content-Type: application/json" \
        -d '{"username": "usuario_prueba", "password": "password123"}'
   ```
 
-* **Acción en Pantalla:**
-  Se resalta en la terminal la línea de cabecera de respuesta HTTP:  
-  `Set-Cookie: session=eyJ1c2VySWQiOjIsInVzZXJuYW1lIjoidXN1YXJpb19wcnVlYmEiLCJyb2xlIjoidXNlciJ9; Path=/`
-
-* **Narrativa en el Video:**
-  > *"Tras identificar los puntos de entrada, simulamos una interacción legítima registrando y autenticando un usuario base. Al utilizar la bandera `-i` en `curl` para inspeccionar la respuesta del servidor Express.js, capturamos la cabecera `Set-Cookie`. Observamos que la aplicación emite una galleta de sesión llamada `session` compuesta por una cadena de caracteres alfanuméricos terminados aparentemente en un formato codificado."*
+* 🗣️ **Guión Hablado (Decir esto exactamente mientras se resalta la cabecera `Set-Cookie`):**
+  > *"Ahora realizamos el proceso de autenticación enviando una petición HTTP POST al endpoint `/api/login`. Noten que estamos utilizando la bandera `-i` en `curl`, la cual nos permite inspeccionar de manera transparente todas las cabeceras de la respuesta HTTP emitidas por el servidor Express.js.*  
+  > *Al recibir la respuesta exitosa `HTTP 200 OK`, dirigimos nuestra atención a la cabecera de respuesta `Set-Cookie`. Observen cómo el servidor asigna una cookie de sesión denominada `session`, la cual contiene una cadena de caracteres aparentemente codificados. Esta galleta de sesión es el único token que el navegador utilizará en lo adelante para validar la identidad del usuario en cada petición subsiguiente."*
 
 ---
 
-#### 1.3 Análisis Profundo de la Cookie (Descubrimiento de CWE-311 y CWE-345)
+### PASO 1.4: Decodificación en texto plano y diagnóstico de Fallas Criptográficas
 
-* **Comando a ejecutar en Kali Linux:**
+* 🖥️ **Acción Visual:**
+  El estudiante copia la cadena Base64 devuelta en la cookie (por ejemplo: `eyJ1c2VySWQiOjIsInVzZXJuYW1lIjoidXN1YXJpb19wcnVlYmEiLCJyb2xlIjoidXNlciJ9`), escribe el comando `echo "cadena" | base64 -d` y presiona Enter. En pantalla se imprime el JSON decodificado.
+
+* ⌨️ **Comando a ejecutar:**
   ```bash
   echo "eyJ1c2VySWQiOjIsInVzZXJuYW1lIjoidXN1YXJpb19wcnVlYmEiLCJyb2xlIjoidXNlciJ9" | base64 -d
   ```
 
-* **Resultado en Pantalla:**
-  `{"userId":2,"username":"usuario_prueba","role":"user"}`
-
-* **Narrativa en el Video (Sustento Teórico Profundo):**
-  > *"Al someter dicha cadena a una decodificación nativa en texto plano con `base64 -d`, confirmamos un hallazgo crítico dentro de la categoría **OWASP A04:2025 - Fallas Criptográficas**:*  
-  > *1. **CWE-311 (Falta de Cifrado de Datos Sensibles):** La aplicación almacena el objeto de sesión del usuario (`userId`, `username` y `role`) directamente en texto plano codificado únicamente en Base64, el cual es una representación de codificación y no un esquema de cifrado.*  
-  > *2. **CWE-345 (Verificación Insuficiente de Autenticidad de Datos):** La cookie carece completamente de un código de autenticación de mensajes basado en hash (HMAC) o firma digital. Esto demuestra que la integridad de la sesión recae únicamente en el cliente, permitiendo que un vector de ataque pueda adulterar estos campos en la siguiente fase.*  
-  > *Con esto concluye la Fase de Reconocimiento, habiendo mapeado la superficie de ataque y aislado las fallas de diseño de la aplicación."*
+* 🗣️ **Guión Hablado (Decir esto mientras se muestra el JSON decodificado `{"userId":2,"username":"usuario_prueba","role":"user"}`):**
+  > *"Para verificar la robustez de este mecanismo de control de estado, tomamos el valor de la cookie y lo procesamos nativamente en la consola con el comando de decodificación `base64 -d`.*  
+  > *Como pueden apreciar en pantalla, la cadena se decodifica instantáneamente revelando un objeto JSON en texto plano con la estructura: `userId: 2`, `username: usuario_prueba` y `role: user`.*  
+  > *Este hallazgo nos permite diagnosticar formalmente una deficiencia estructural dentro de la categoría **OWASP A04:2025 - Fallas Criptográficas**, fundamentada en dos debilidades específicas del catálogo de debilidades comunes:*  
+  > *Primero, **CWE-311: Falta de Cifrado de Datos Sensibles**. La aplicación transmite y almacena información sensible de la sesión utilizando Base64, el cual es un esquema de codificación pública para transporte de datos, no un algoritmo de cifrado confidencial.*  
+  > *Segundo, **CWE-345: Verificación Insuficiente de Autenticidad de Datos**. La cookie entregada por el servidor no cuenta con un código de autenticación de mensajes basado en hash, es decir, no posee una firma HMAC ni token criptográfico. Esto significa que la confianza del estado recae ciegamente en lo que el cliente envíe. Con esta constatación teórica y práctica, damos por concluida con éxito la Fase I de Reconocimiento."*
 
 ---
 
-### 🟡 FASE II: ARMAMENTO (Weaponization)
-**Objetivo:** Diseñar, calibrar y empaquetar los vectores de ataque (payloads) en la máquina del atacante (Kali Linux) sin enviarlos aún al servidor objetivo. Se justifica teóricamente cómo la lógica interna del backend en Node.js/SQLite condiciona el diseño de cada exploit.
+# 🟡 FASE II: ARMAMENTO (WEAPONIZATION)
 
 ---
 
-#### 2.1 Calibración del Payload de Inyección SQL (CWE-89 / OWASP A05:2025)
+### PASO 2.1: Análisis de la vulnerabilidad SQLi en el código fuente y diseño del Payload
 
-* **Acción en Pantalla:**
-  Abrir en pantalla la herramienta de texto o la consola mostrando el archivo `payload.json` creado o el documento `PAYLOADS_REFERENCIA.txt`. Mostrar brevemente el fragmento de código vulnerable en `vulnerable/server.js`:
+* 🖥️ **Acción Visual:**
+  El estudiante abre en pantalla el archivo `payload_sqli.json` o muestra en un editor de texto el fragmento vulnerable del archivo `vulnerable/server.js`:
   ```javascript
   const query = `
     SELECT id, username, role, email, password
@@ -90,7 +99,7 @@
   `;
   ```
 
-* **Comando de preparación en Kali:**
+* ⌨️ **Comando a ejecutar (Creación del archivo payload en Kali):**
   ```bash
   cat << 'EOF' > payload_sqli.json
   {"username": "' OR 1=1 OR '1'='1", "password": "x"}
@@ -98,56 +107,59 @@
   cat payload_sqli.json
   ```
 
-* **Narrativa en el Video (Explicación Teórica y Técnica Definitiva):**
-  > *"Entramos a la Fase II: Armamento. En esta etapa preparamos los payloads específicos para explotar las vulnerabilidades identificadas.*  
-  > *Para la vulnerabilidad **OWASP A05:2025 Inyección (CWE-89: SQL Injection)** en el endpoint `/api/login`, analizamos la construcción de la consulta en el backend. El servidor procesa la petición mediante concatenación directa de variables dentro de un Template Literal multilínea en JavaScript.*  
-  > *Un vector de inyección SQL clásico que emplee comentarios de línea como `--` o `/*` resulta ineficaz en esta arquitectura, debido a que el caracter de salto de línea interrumpe el alcance del comentario, dejando activa la línea inferior donde se valida la contraseña con `AND password = ...`.*  
-  > *Por esta razón, diseñamos un payload de **lógica booleana pura**: `' OR 1=1 OR '1'='1`. Al inyectar esta secuencia dentro de la variable `username`, la consulta SQL resultante en la base de datos SQLite se transforma en:*  
+* 🗣️ **Guión Hablado (Decir esto mientras se muestra el código y se crea el archivo JSON):**
+  > *"Entramos a la Fase II de nuestra metodología: Armamento. En esta etapa preparamos y construimos los vectores de ataque en la máquina atacante Kali Linux antes de su entrega.*  
+  > *Comenzamos diseñando el exploit para la vulnerabilidad de **Inyección SQL (CWE-89)** enmarcada en **OWASP A05:2025 - Inyección**. Al examinar la estructura del backend en Node.js, observamos que el servidor procesa la consulta de autenticación concatenando directamente la variable `username` dentro de un Template Literal multilínea en JavaScript.*  
+  > *Aquí ocurre un fenómeno técnico fundamental: los payloads clásicos de inyección SQL que intentan comentar el resto de la consulta mediante secuencias como `--` o `/*` resultan totalmente ineficaces. Esto se debe a que la consulta está distribuida en varias líneas físicas de código, por lo que el caracter de comentario `--` solo anula la línea donde se inyecta el usuario, dejando intacta la línea inferior donde se valida la contraseña con `AND password = ...`.*  
+  > *Para superar esta restricción arquitectónica, calibramos un payload basado en **lógica booleana pura**: `' OR 1=1 OR '1'='1`. Al ser inyectado, la consulta en la base de datos SQLite se transforma estructuralmente en:*  
   > `WHERE username = '' OR 1=1 OR '1'='1 AND password = '...'`  
-  > *Dado que la proposición `1=1` es una tautología matemática (siempre verdadera), la evaluación lógica completa de la cláusula `WHERE` devuelve `TRUE` sin necesidad de comentar el resto de la sentencia, garantizando la evasión del control de autenticación."*
+  > *Dado que la proposición `1=1` es una tautología matemática irrefutable, toda la condición lógica de la cláusula `WHERE` se evalúa como Verdadera (`TRUE`), anulando la exigencia de la contraseña sin requerir comentarios de código. Guardamos este payload en el archivo `payload_sqli.json`."*
 
 ---
 
-#### 2.2 Armamento para el Ataque de Cookie Tampering (CWE-345 / OWASP A04:2025)
+### PASO 2.2: Construcción y codificación del vector para Cookie Tampering
 
-* **Acción en Pantalla:**
-  En la terminal de Kali, construir la estructura del JSON manipulado y mostrar cómo se codifica en Base64 localmente antes de enviarlo.
+* 🖥️ **Acción Visual:**
+  El estudiante muestra en la consola de Kali cómo altera el JSON del objeto de sesión y cómo lo convierte a Base64 antes de lanzarlo.
 
-* **Comandos de preparación en Kali:**
+* ⌨️ **Comando a ejecutar:**
   ```bash
-  # Estructura del payload JSON adulterado para suplantar al ID 1 (Admin)
   echo -n '{"userId":1,"username":"usuario_prueba","role":"user"}' | base64 -w 0
   ```
 
-* **Narrativa en el Video:**
-  > *"Para la explotación de la **Falla Criptográfica (CWE-345)**, empaquetamos el vector de suplantación de sesión. Tomando la estructura JSON identificada en la Fase I, alteramos el identificador único del usuario (`userId`) cambiando el valor `2` (usuario estándar) por `1` (correspondiente al primer usuario o administrador del sistema).*  
-  > *Re-codificamos esta estructura adulterada en Base64 utilizando la herramienta nativa de terminal. Dado que el servidor carece de mecanismos de firma HMAC para verificar la integridad del payload, este paquete queda listo para ser inyectado en la cabecera HTTP `Cookie: session=...` durante la fase de entrega."*
+* 🗣️ **Guión Hablado (Decir esto mientras se ejecuta el comando y se muestra el resultado en Base64):**
+  > *"A continuación, armamos el vector de explotación para la falla criptográfica **CWE-345 de Verificación Insuficiente de Autenticidad**. Afrontando la corrección establecida por la profesora, este ataque no se enfoca en un escalado de roles a nivel de aplicación, sino en demostrar la suplantación de identidad por manipulación de identificadores.*  
+  > *Construimos un payload JSON en el cual alteramos el campo `userId`, cambiando el identificador `2` correspondiente al usuario estándar, por el identificador `1`, correspondiente al primer usuario registrado en la base de datos.*  
+  > *Procedemos a codificar esta estructura adulterada en Base64 usando la herramienta de consola. Debido a que en la Fase I confirmamos la ausencia total de un código HMAC de verificación de integridad en el backend, empaquetamos esta cookie adulterada para inyectarla en la cabecera HTTP durante la fase de entrega."*
 
 ---
 
-#### 2.3 Preparación de la Suite de Cracking MD5 (CWE-327 / CWE-759 / CWE-916)
+### PASO 2.3: Configuración del entorno de criptoanálisis con Hashcat
 
-* **Acción en Pantalla:**
-  Mostrar el archivo de diccionario `rockyou.txt` o la sintaxis del comando `hashcat` preparado en pantalla.
+* 🖥️ **Acción Visual:**
+  El estudiante muestra en la terminal la presencia del diccionario de contraseñas de Kali y la verificación de la sintaxis de Hashcat para ataques sobre hashes MD5.
 
-* **Comando a mostrar en terminal Kali:**
+* ⌨️ **Comando a ejecutar:**
   ```bash
   ls -lh /usr/share/wordlists/rockyou.txt
   hashcat --help | grep -E "\-m 0"
   ```
 
-* **Narrativa en el Video:**
-  > *"Para vulnerar la confidencialidad de las credenciales de la base de datos, preparamos la fase de análisis criptoanalítico contra **CWE-327 (Uso de Algoritmo Criptográfico Obsoleto MD5)**, **CWE-759 (Hash Unidireccional sin Sal/Salt)** y **CWE-916 (Esfuerzo Computacional Insuficiente)**.*  
-  > *Debido a que las contraseñas se almacenan mediante el algoritmo MD5 sin aplicar sal estocástica (salt), el proceso de derivación de claves es estrictamente determinista. Esto nos permite armar la herramienta `Hashcat` en la máquina atacante Kali Linux con el modo `-m 0` (MD5 puro) y el diccionario estandarizado `rockyou.txt` para llevar a cabo un ataque de colisión por preimagen en tiempo récord."*
+* 🗣️ **Guión Hablado (Decir esto mientras se ejecutan los comandos de verificación):**
+  > *"Para vulnerar la confidencialidad de las credenciales de la base de datos, preparamos la fase de análisis criptoanalítico contra tres debilidades criptográficas severas:*  
+  > *1. **CWE-327: Uso de un Algoritmo Criptográfico Rompible**, al utilizar MD5.*  
+  > *2. **CWE-759: Uso de un Hash Unidireccional sin Sal**, lo que genera hashes idénticos y deterministas.*  
+  > *3. **CWE-916: Esfuerzo Computacional Insuficiente**, al ser MD5 un algoritmo diseñado para velocidad y no para protección de contraseñas.*  
+  > *En la máquina atacante Kali Linux, verificamos la disponibilidad del diccionario masivo `rockyou.txt` y configuramos la suite `Hashcat` especificando el parámetro `-m 0`, correspondiente al modo de ataque directo sobre hashes MD5 puros. Las armas quedan calibradas para revertir cualquier hash extraído en cuestión de segundos."*
 
 ---
 
-#### 2.4 Armamento del Gusano Stored XSS Autorreplicante (CWE-79 / CWE-116)
+### PASO 2.4: Ensamblaje del Gusano Autorreplicante Stored XSS y Servidor C2
 
-* **Acción en Pantalla:**
-  Mostrar el script de payload XSS preparado en `PAYLOADS_REFERENCIA.txt` o en el archivo `red-team/04_xss_worm_payload.py`.
+* 🖥️ **Acción Visual:**
+  El estudiante muestra en pantalla el código JavaScript del script malicioso que se inyectará en la mensajería, destacando las líneas de exfiltración.
 
-* **Código del Payload en Pantalla:**
+* ⌨️ **Código a mostrar en pantalla:**
   ```html
   <script>
   (async function(){
@@ -156,17 +168,9 @@
   </script>
   ```
 
-* **Narrativa en el Video:**
-  > *"Finalmente, armamos el vector de ataque para la categoría **OWASP A05:2025 Stored XSS (CWE-79: Cross-Site Scripting)**. Diseñamos un payload en JavaScript asíncrono que aprovecha la renderización insegura mediante `innerHTML` en el cliente (CWE-116).*  
-  > *El script preparado ejecutará dos acciones simultáneas al ser interpretado por la víctima: primero, extraerá el contenido del objeto `document.cookie` y lo enviará silenciosamente vía HTTP GET hacia nuestro servidor de Comando y Control (C2) a la IP `192.168.56.10:8888`. Segundo, propagará automáticamente este vector enviando un mensaje a los demás usuarios de la plataforma."*
-
----
-
-## 📊 RESUMEN DE MAPEO METODOLÓGICO
-
-| Fase CKC | Vulnerabilidad Mapeada | CWE Asociados | Herramientas Utilizadas |
-|---|---|---|---|
-| **Fase I: Reconocimiento** | Superficie de API & Cookies Base64 | CWE-311, CWE-345 | `ffuf`, `curl -i`, `base64 -d` |
-| **Fase II: Armamento** | SQLi, Cookie Tampering, MD5, XSS | CWE-89, CWE-327, CWE-759, CWE-916, CWE-79, CWE-116 | `payload_sqli.json`, `Hashcat`, `Base64 CLI`, Script JS XSS |
+* 🗣️ **Guión Hablado (Decir esto mientras se muestra el código JavaScript):**
+  > *"Por último, ensamblamos el arma ofensiva para la categoría **OWASP A05:2025 - Stored XSS (CWE-79: Cross-Site Scripting)** combinada con **CWE-116: Codificación Inadecuada de Salida**.*  
+  > *Programamos un payload en JavaScript asíncrono autocontenido que se alojará de forma persistente en la base de datos a través del endpoint de mensajes. Al ser interpretado por el navegador de cualquier víctima debido al uso de `innerHTML` en el frontend, el script ejecutará una exfiltración sigilosa de la cookie de sesión mediante una petición `fetch` asíncrona apuntando a nuestro listener de Comando y Control (C2) en la IP `192.168.56.10` en el puerto `8888`.*  
+  > *Con todos nuestros vectores calibrados, probados y justificados teóricamente, damos por finalizada la Fase II de Armamento y estamos listos para la fase de ejecución."*
 
 ---
